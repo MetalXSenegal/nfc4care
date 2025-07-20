@@ -32,6 +32,14 @@ services:
       - nfc4care-network
     restart: unless-stopped
 
+  ganache:
+    image: trufflesuite/ganache
+    container_name: nfc4care-ganache
+    ports:
+      - "8545:8545"
+    networks:
+      - nfc4care-network
+
 volumes:
   postgres_data:
 
