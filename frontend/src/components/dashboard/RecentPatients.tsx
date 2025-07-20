@@ -3,7 +3,7 @@ import { User, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Patient {
-  id: string;
+  id: string | number;
   nom: string;
   prenom: string;
   dateNaissance: string;
@@ -13,9 +13,10 @@ interface Patient {
 
 interface RecentPatientsProps {
   patients: Patient[];
+  onPatientClick?: (id: string | number) => void;
 }
 
-const RecentPatients: React.FC<RecentPatientsProps> = ({ patients }) => {
+const RecentPatients: React.FC<RecentPatientsProps> = ({ patients, onPatientClick }) => {
   const calculateAge = (dateNaissance: string) => {
     const birthDate = new Date(dateNaissance);
     const today = new Date();
@@ -27,6 +28,12 @@ const RecentPatients: React.FC<RecentPatientsProps> = ({ patients }) => {
     }
     
     return age;
+  };
+
+  const handlePatientClick = (patient: Patient) => {
+    if (onPatientClick) {
+      onPatientClick(patient.id);
+    }
   };
 
   if (patients.length === 0) {
@@ -46,7 +53,10 @@ const RecentPatients: React.FC<RecentPatientsProps> = ({ patients }) => {
       <ul className="divide-y divide-gray-200">
         {patients.map(patient => (
           <li key={patient.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
-            <Link to={`/patient/${patient.id}`} className="flex items-center justify-between">
+            <button 
+              onClick={() => handlePatientClick(patient)}
+              className="w-full flex items-center justify-between text-left"
+            >
               <div className="flex items-center">
                 <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
                   <User className="h-5 w-5 text-blue-600" />
@@ -68,7 +78,7 @@ const RecentPatients: React.FC<RecentPatientsProps> = ({ patients }) => {
                 </span>
                 <ArrowRight size={16} className="text-gray-400" />
               </div>
-            </Link>
+            </button>
           </li>
         ))}
       </ul>

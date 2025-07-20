@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login Frontend</title>
+</head>
+<body>
+    <h1>Test de Connexion Frontend</h1>
+    
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" value="doctor@example.com">
+    </div>
+    
+    <div>
+        <label for="password">Mot de passe:</label>
+        <input type="password" id="password" value="password">
+    </div>
+    
+    <button onclick="testLogin()">Tester la connexion</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            console.log('🔐 Test de connexion...');
+            console.log('📧 Email:', email);
+            console.log('🔑 Mot de passe:', password);
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                console.log('📡 Réponse reçue:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Données reçues:', data);
+                    
+                    if (data.success && data.data && data.data.token) {
+                        console.log('🔑 Token reçu:', data.data.token.substring(0, 20) + '...');
+                        
+                        // Test de stockage dans localStorage
+                        try {
+                            localStorage.setItem('authToken', data.data.token);
+                            localStorage.setItem('doctorData', JSON.stringify({
+                                id: data.data.professionnelId,
+                                email: data.data.email,
+                                nom: data.data.nom,
+                                prenom: data.data.prenom,
+                                specialite: data.data.specialite,
+                                numeroRpps: data.data.numeroRpps,
+                                role: data.data.role,
+                                dateCreation: data.data.dateCreation,
+                                actif: data.data.actif
+                            }));
+                            
+                            console.log('💾 Token stocké dans localStorage');
+                            console.log('🔍 Vérification localStorage:');
+                            console.log('  - authToken:', localStorage.getItem('authToken') ? 'Présent' : 'Absent');
+                            console.log('  - doctorData:', localStorage.getItem('doctorData') ? 'Présent' : 'Absent');
+                            
+                            resultDiv.innerHTML = `
+                                <h3>✅ Connexion réussie!</h3>
+                                <p>Token stocké: ${localStorage.getItem('authToken') ? 'Oui' : 'Non'}</p>
+                                <p>Données stockées: ${localStorage.getItem('doctorData') ? 'Oui' : 'Non'}</p>
+                                <p>Utilisateur: ${data.data.prenom} ${data.data.nom}</p>
+                            `;
+                            
+                            // Test des endpoints dashboard
+                            setTimeout(() => testDashboardEndpoints(data.data.token), 1000);
+                            
+                        } catch (storageError) {
+                            console.error('❌ Erreur de stockage:', storageError);
+                            resultDiv.innerHTML = `<h3>❌ Erreur de stockage: ${storageError.message}</h3>`;
+                        }
+                    } else {
+                        console.log('❌ Pas de token dans la réponse');
+                        resultDiv.innerHTML = '<h3>❌ Pas de token dans la réponse</h3>';
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.log('❌ Erreur HTTP:', response.status, errorText);
+                    resultDiv.innerHTML = `<h3>❌ Erreur HTTP: ${response.status}</h3><p>${errorText}</p>`;
+                }
+            } catch (error) {
+                console.error('❌ Erreur de connexion:', error);
+                resultDiv.innerHTML = `<h3>❌ Erreur de connexion: ${error.message}</h3>`;
+            }
+        }
+        
+        async function testDashboardEndpoints(token) {
+            console.log('📊 Test des endpoints dashboard...');
+            
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+            
+            try {
+                // Test /api/dashboard/stats
+                const statsResponse = await fetch('http://localhost:8080/api/dashboard/stats', {
+                    method: 'GET',
+                    headers
+                });
+                
+                console.log('📊 Stats response:', statsResponse.status);
+                if (statsResponse.ok) {
+                    const statsData = await statsResponse.json();
+                    console.log('✅ Stats data:', statsData);
+                } else {
+                    console.log('❌ Stats error:', await statsResponse.text());
+                }
+                
+                // Test /api/dashboard/recent-patients
+                const patientsResponse = await fetch('http://localhost:8080/api/dashboard/recent-patients', {
+                    method: 'GET',
+                    headers
+                });
+                
+                console.log('👥 Patients response:', patientsResponse.status);
+                if (patientsResponse.ok) {
+                    const patientsData = await patientsResponse.json();
+                    console.log('✅ Patients data:', patientsData);
+                } else {
+                    console.log('❌ Patients error:', await patientsResponse.text());
+                }
+                
+            } catch (error) {
+                console.error('❌ Erreur endpoints dashboard:', error);
+            }
+        }
+    </script>
+</body>
+</html> 

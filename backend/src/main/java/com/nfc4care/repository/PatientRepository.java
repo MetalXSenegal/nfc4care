@@ -21,7 +21,9 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     @Query("SELECT p FROM Patient p WHERE p.actif = true AND " +
            "(LOWER(p.nom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
            "LOWER(p.prenom) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
-           "p.numeroDossier LIKE CONCAT('%', :searchTerm, '%'))")
+           "p.numeroDossier LIKE CONCAT('%', :searchTerm, '%') OR " +
+           "p.telephone LIKE CONCAT('%', :searchTerm, '%') OR " +
+           "LOWER(p.email) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     List<Patient> searchPatients(@Param("searchTerm") String searchTerm);
     
     boolean existsByNumeroDossier(String numeroDossier);
@@ -29,4 +31,9 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     boolean existsByNumeroSecuriteSociale(String numeroSecuriteSociale);
     
     boolean existsByNumeroNFC(String numeroNFC);
+    
+    // Dashboard methods
+    long countByNumeroNFCIsNotNull();
+    
+    List<Patient> findTop5ByOrderByDateCreationDesc();
 } 

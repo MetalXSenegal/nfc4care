@@ -17,4 +17,8 @@ public class AuthResponse {
     private String prenom;
     private String email;
     private String role;
+    private String specialite;
+    private String numeroRpps;
+    private String dateCreation;
+    private boolean actif;
 } 

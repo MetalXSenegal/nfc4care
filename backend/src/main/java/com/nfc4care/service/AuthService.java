@@ -35,7 +35,10 @@ public class AuthService {
         professionnel.setDerniereConnexion(LocalDateTime.now());
         professionnelRepository.save(professionnel);
         
-        String token = jwtService.generateToken(professionnel);
+        // Générer et sauvegarder le token
+        String token = jwtService.generateAndSaveToken(professionnel, "Web Client", "127.0.0.1");
+        
+        log.info("Token généré et sauvegardé pour l'utilisateur: {}", professionnel.getEmail());
         
         return AuthResponse.builder()
                 .token(token)
@@ -44,7 +47,81 @@ public class AuthService {
                 .prenom(professionnel.getPrenom())
                 .email(professionnel.getEmail())
                 .role(professionnel.getRole().name())
+                .specialite(professionnel.getSpecialite())
+                .numeroRpps(professionnel.getNumeroRPPS())
+                .dateCreation(professionnel.getDateCreation().toString())
+                .actif(professionnel.isActif())
                 .build();
+    }
+    
+    public AuthResponse verify2FA(String code, String token) {
+        // Pour l'instant, on simule la vérification 2FA
+        // En production, vous implémenteriez la vraie logique 2FA
+        
+        if (!"123456".equals(code)) {
+            throw new RuntimeException("Code 2FA invalide");
+        }
+        
+        // Extraire les informations du token pour récupérer le professionnel
+        String email = jwtService.extractUsername(token);
+        Professionnel professionnel = professionnelRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Professionnel non trouvé"));
+        
+        // Vérifier que le token est valide
+        if (!jwtService.isTokenValid(token, professionnel)) {
+            throw new RuntimeException("Token invalide ou expiré");
+        }
+        
+        return AuthResponse.builder()
+                .token(token)
+                .professionnelId(professionnel.getId())
+                .nom(professionnel.getNom())
+                .prenom(professionnel.getPrenom())
+                .email(professionnel.getEmail())
+                .role(professionnel.getRole().name())
+                .specialite(professionnel.getSpecialite())
+                .numeroRpps(professionnel.getNumeroRPPS())
+                .dateCreation(professionnel.getDateCreation().toString())
+                .actif(professionnel.isActif())
+                .build();
+    }
+    
+    public AuthResponse validateToken(String token) {
+        String email = jwtService.extractUsername(token);
+        
+        if (email == null) {
+            throw new RuntimeException("Token invalide");
+        }
+        
+        Professionnel professionnel = professionnelRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Professionnel non trouvé"));
+        
+        if (!jwtService.isTokenValid(token, professionnel)) {
+            throw new RuntimeException("Token expiré ou invalide");
+        }
+        
+        return AuthResponse.builder()
+                .token(token)
+                .professionnelId(professionnel.getId())
+                .nom(professionnel.getNom())
+                .prenom(professionnel.getPrenom())
+                .email(professionnel.getEmail())
+                .role(professionnel.getRole().name())
+                .specialite(professionnel.getSpecialite())
+                .numeroRpps(professionnel.getNumeroRPPS())
+                .dateCreation(professionnel.getDateCreation().toString())
+                .actif(professionnel.isActif())
+                .build();
+    }
+    
+    public void logout(String token) {
+        log.info("Déconnexion demandée pour le token");
+        jwtService.revokeToken(token);
+    }
+    
+    public void logoutAllSessions(String userEmail) {
+        log.info("Déconnexion de toutes les sessions pour l'utilisateur: {}", userEmail);
+        jwtService.revokeAllUserTokens(userEmail);
     }
     
     public void initializeDefaultProfessionnel() {

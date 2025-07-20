@@ -22,4 +22,9 @@ public interface ConsultationRepository extends JpaRepository<Consultation, Long
     List<Consultation> findByProfessionnelIdAndDateConsultationAfter(@Param("professionnelId") Long professionnelId, @Param("startDate") LocalDateTime startDate);
     
     Optional<Consultation> findByBlockchainTxnHash(String blockchainTxnHash);
+    
+    // Dashboard methods
+    long countByDateConsultationBetween(LocalDateTime startDate, LocalDateTime endDate);
+    
+    Consultation findTopByDossierMedicalPatientOrderByDateConsultationDesc(com.nfc4care.entity.Patient patient);
 } 

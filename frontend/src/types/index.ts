@@ -1,24 +1,67 @@
 export interface Doctor {
-  id: string;
-  name: string;
+  id: number;
   email: string;
+  nom: string;
+  prenom: string;
+  specialite: string;
+  numeroRpps: string;
+  role: string;
+  dateCreation: string;
+  derniereConnexion?: string;
+  actif: boolean;
 }
 
 export interface Patient {
-  id: string;
-  name: string;
-  age: number;
-  recordNumber: string;
-  lastVisit?: string;
+  id: number;
+  numeroDossier: string;
+  nom: string;
+  prenom: string;
+  dateNaissance: string;
+  sexe: string;
+  adresse: string;
+  telephone: string;
+  email?: string;
+  numeroSecuriteSociale: string;
+  groupeSanguin?: string;
+  numeroNfc?: string;
+  dateCreation: string;
+  derniereConsultation?: string;
+  actif: boolean;
 }
 
 export interface MedicalRecord {
-  id: string;
-  patientId: string;
-  history: MedicalHistoryItem[];
-  prescriptions: Prescription[];
-  allergies: Allergy[];
-  testResults: TestResult[];
+  id: number;
+  patientId: number;
+  antecedentsMedicaux?: string;
+  antecedentsChirurgicaux?: string;
+  antecedentsFamiliaux?: string;
+  traitementsEnCours?: string;
+  allergies?: string;
+  observationsGenerales?: string;
+  hashContenu: string;
+  blockchainTxnHash?: string;
+  dateCreation: string;
+  dateModification: string;
+  professionnelCreationId: number;
+  professionnelModificationId?: number;
+}
+
+export interface Consultation {
+  id: number;
+  dossierMedicalId: number;
+  professionnelId: number;
+  dateConsultation: string;
+  motifConsultation: string;
+  examenClinique?: string;
+  diagnostic?: string;
+  traitementPrescrit?: string;
+  ordonnance?: string;
+  observations?: string;
+  prochainRdv?: string;
+  hashContenu: string;
+  blockchainTxnHash?: string;
+  dateCreation: string;
+  dateModification: string;
 }
 
 export interface MedicalHistoryItem {

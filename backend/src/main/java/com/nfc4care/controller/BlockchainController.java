@@ -13,7 +13,6 @@ import java.util.Map;
 @RequestMapping("/blockchain")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class BlockchainController {
     
     private final CardanoService cardanoService;

@@ -1,308 +1,299 @@
-# NFC4Care - Application de Gestion Médicale Sécurisée
+# NFC4Care - Système de Gestion Médicale avec NFC et Blockchain
 
-## 🎯 Rôle et Objectif de l'Application
+## 🏥 Vue d'ensemble
 
-**NFC4Care** est une application de gestion médicale innovante qui combine **technologie NFC** et **blockchain Cardano** pour sécuriser et optimiser la gestion des dossiers médicaux.
+NFC4Care est une application médicale complète et moderne qui révolutionne la gestion des dossiers patients grâce à l'intégration de technologies NFC et blockchain. L'application permet aux professionnels de santé d'accéder rapidement aux informations patients via des cartes NFC, tout en garantissant l'intégrité et la sécurité des données médicales.
 
-### 🏥 Problématique Résolue
+### 🎯 Objectifs principaux
 
-Dans le secteur médical, la **sécurité des données** et la **traçabilité** sont critiques :
-- Protection des informations médicales sensibles
-- Vérification de l'intégrité des dossiers
-- Traçabilité des modifications
-- Authentification sécurisée des professionnels
-- Accès rapide aux informations patient
-
-### 🔐 Solution NFC4Care
-
-**NFC4Care** apporte une solution complète :
-
-1. **🔍 Scanner NFC** : Identification rapide des patients via tags NFC
-2. **⛓️ Blockchain Cardano** : Sécurisation et traçabilité des données médicales
-3. **🔐 Authentification JWT** : Accès sécurisé pour les professionnels
-4. **📊 Dashboard Intelligent** : Vue d'ensemble et statistiques
-5. **📱 Interface Moderne** : Application web responsive et intuitive
-
-### 🎯 Cas d'Usage Principaux
-
-#### Pour les Professionnels de Santé
-- **Connexion sécurisée** avec authentification JWT
-- **Scanner NFC** pour identifier rapidement un patient
-- **Consulter/Modifier** les dossiers médicaux
-- **Traçabilité** de toutes les modifications via blockchain
-- **Recherche avancée** de patients
-
-#### Pour les Établissements Médicaux
-- **Gestion centralisée** des dossiers patients
-- **Sécurité renforcée** avec blockchain
-- **Audit trail** complet des accès et modifications
-- **Interface moderne** et intuitive
-- **Intégration facile** avec les systèmes existants
+- **Accès rapide aux dossiers patients** via cartes NFC
+- **Sécurisation des données médicales** avec blockchain Cardano
+- **Interface moderne et intuitive** pour les professionnels de santé
+- **Gestion complète des consultations** et dossiers médicaux
+- **Authentification sécurisée** avec 2FA
+- **Conformité RGPD** et standards médicaux
 
 ## 🏗️ Architecture
 
-- **Frontend** : React + TypeScript + Tailwind CSS
-- **Backend** : Spring Boot + JPA + PostgreSQL + JWT
-- **Blockchain** : Cardano via Blockfrost.io
-- **Base de données** : PostgreSQL 15-alpine
-- **Authentification** : JWT (JSON Web Tokens)
+### Frontend (React + TypeScript)
+- **Framework**: React 18 avec TypeScript
+- **Styling**: Tailwind CSS
+- **État**: Context API pour l'authentification
+- **NFC**: Web NFC API pour la lecture/écriture de cartes
+- **Routing**: React Router v6
+- **UI Components**: Composants personnalisés avec Lucide React
+
+### Backend (Spring Boot + Java)
+- **Framework**: Spring Boot 3.x
+- **Base de données**: PostgreSQL 15
+- **Authentification**: JWT avec 2FA
+- **API**: RESTful avec documentation Swagger
+- **Blockchain**: Intégration Cardano via Blockfrost API
+- **Sécurité**: Spring Security avec CORS configuré
+
+### Base de données (PostgreSQL)
+- **Tables principales**: Patients, Professionnels, Dossiers médicaux, Consultations
+- **Indexation**: Optimisée pour les recherches rapides
+- **Intégrité**: Contraintes et relations bien définies
+- **Données**: 10 patients réels avec dossiers complets
+
+## 🚀 Démarrage rapide
+
+### Prérequis
+- **Node.js** 18+ et npm
+- **Java** 17+ et Maven
+- **Docker** Desktop
+- **Git**
+
+### Installation et démarrage
+
+#### Option 1: Script automatique (Recommandé)
+
+**Windows (PowerShell) :**
+```powershell
+# Cloner le projet
+git clone <repository-url>
+cd nfc4care
+
+# Démarrer toute l'application
+.\start-nfc4care.ps1
+```
+
+**Windows (Command Prompt) :**
+```cmd
+# Cloner le projet
+git clone <repository-url>
+cd nfc4care
+
+# Démarrer toute l'application
+start-nfc4care.bat
+```
+
+#### Option 2: Démarrage manuel
+
+**Windows (PowerShell) :**
+```powershell
+# 1. Démarrer la base de données
+.\start-database.bat
+
+# 2. Démarrer le backend
+.\start-backend.bat
+
+# 3. Démarrer le frontend
+.\start-frontend.ps1
+```
+
+**Windows (Command Prompt) :**
+```cmd
+# 1. Démarrer la base de données
+start-database.bat
+
+# 2. Démarrer le backend
+start-backend.bat
+
+# 3. Démarrer le frontend
+start-frontend.bat
+```
+
+### Accès à l'application
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8080
+- **Documentation API**: http://localhost:8080/swagger-ui.html
+- **Base de données**: localhost:5432
+
+### Identifiants de connexion
+```
+Email: doctor@example.com
+Mot de passe: password
+```
+
+## 📊 Données de démonstration
+
+L'application inclut des données réelles et complètes :
+
+### Professionnels de santé (4)
+- Dr. Martin Dubois (Médecine générale)
+- Dr. Marie Bernard (Cardiologie)
+- Dr. Jean Petit (Dermatologie)
+- Sophie Dupont (Infirmier)
+
+### Patients (10) avec dossiers complets
+- Sophie Laurent (42 ans, Lombalgie chronique)
+- Marc Dupont (67 ans, Hypertension)
+- Émilie Moreau (29 ans, Anxiété)
+- Thomas Petit (54 ans, Diabète type 2)
+- Claire Martin (35 ans, Asthme)
+- Pierre Rousseau (48 ans, Arthrose)
+- Anne Leroy (32 ans, Dépression)
+- Michel Simon (61 ans, BPCO)
+- Isabelle Garcia (38 ans, Hypothyroïdie)
+- François Lefevre (45 ans, Ulcère gastrique)
+
+### Consultations (12)
+- Consultations récentes avec diagnostics, traitements et ordonnances
+- Données temporelles réalistes (dernières heures à semaines)
+- Multiples spécialités médicales
+
+## 🔧 Fonctionnalités principales
+
+### 🔐 Authentification sécurisée
+- Connexion avec email/mot de passe
+- Authentification à deux facteurs (2FA)
+- Gestion des sessions avec JWT
+- Déconnexion automatique après inactivité
+
+### 📱 Interface utilisateur moderne
+- **Dashboard** avec statistiques en temps réel
+- **Recherche patients** avec filtres avancés
+- **Historique des consultations** détaillé
+- **Profil médecin** avec informations complètes
+- **Gestion des dossiers patients** complète
+
+### 🏷️ Technologie NFC
+- **Lecture de cartes NFC** pour accès rapide aux dossiers
+- **Écriture de cartes NFC** pour nouveaux patients
+- **Support Web NFC API** natif
+- **Gestion des erreurs** et fallbacks
+
+### ⛓️ Intégration Blockchain
+- **Vérification d'intégrité** des dossiers médicaux
+- **Historique blockchain** des modifications
+- **Hachage sécurisé** des données sensibles
+- **API Cardano** via Blockfrost
+
+### 🔍 Recherche et filtres
+- **Recherche en temps réel** par nom, prénom, dossier, téléphone, email
+- **Filtres avancés** : groupe sanguin, âge, présence NFC
+- **Historique des recherches** récentes
+- **Interface responsive** et intuitive
+
+## 🛡️ Sécurité
+
+### Authentification
+- JWT avec expiration automatique
+- Authentification à deux facteurs
+- Gestion sécurisée des sessions
+- Protection contre les attaques par force brute
+
+### Données
+- Chiffrement des mots de passe (BCrypt)
+- Hachage des dossiers médicaux
+- Validation des entrées utilisateur
+- Protection CORS configurée
+
+### Blockchain
+- Vérification d'intégrité des données
+- Traçabilité des modifications
+- Immutabilité des enregistrements
+- Conformité RGPD
 
 ## 📁 Structure du projet
 
 ```
 nfc4care/
-├── frontend/              # Application React
-│   ├── src/              # Code source React
-│   ├── package.json      # Dépendances Node.js
-│   ├── vite.config.ts    # Configuration Vite
-│   └── README.md         # Documentation frontend
-├── backend/              # Application Spring Boot
-│   ├── src/              # Code source Java
-│   ├── pom.xml           # Dépendances Maven
-│   ├── database/         # Scripts SQL PostgreSQL
-│   └── README.md         # Documentation backend
-├── start-apps.bat        # Script de démarrage Windows
-├── start-apps.sh         # Script de démarrage Linux/Mac
-└── README.md             # Documentation principale
+├── frontend/                 # Application React
+│   ├── src/
+│   │   ├── components/      # Composants UI
+│   │   ├── pages/          # Pages principales
+│   │   ├── services/       # Services API
+│   │   ├── context/        # Context React
+│   │   └── types/          # Types TypeScript
+│   ├── package.json
+│   └── vite.config.ts
+├── backend/                 # Application Spring Boot
+│   ├── src/main/java/
+│   │   ├── controllers/    # Contrôleurs REST
+│   │   ├── services/       # Services métier
+│   │   ├── repositories/   # Accès données
+│   │   ├── entities/       # Entités JPA
+│   │   └── config/         # Configuration
+│   ├── database/           # Scripts SQL
+│   └── pom.xml
+├── docker-compose.yml      # Configuration Docker
+├── start-nfc4care.ps1      # Script PowerShell principal
+├── start-nfc4care.bat      # Script batch principal
+├── start-frontend.ps1      # Script PowerShell frontend
+├── start-frontend.bat      # Script batch frontend
+├── start-backend.bat       # Script backend
+├── start-database.bat      # Script base de données
+└── README.md
 ```
 
-## 🚀 Démarrage rapide
+## 🚀 Déploiement
 
-### Prérequis
+### Développement
+```powershell
+# Démarrer en mode développement (PowerShell)
+.\start-nfc4care.ps1
 
-- **Java 17** ou supérieur
-- **Node.js 18** ou supérieur
-- **PostgreSQL 15** ou supérieur (ou Docker)
-- **Maven 3.6** ou supérieur
-
-### 1. Configuration de la base de données
-
-**Option A : PostgreSQL local**
-```sql
-CREATE DATABASE nfc4care;
+# Ou avec Command Prompt
+start-nfc4care.bat
 ```
 
-**Option B : Docker (recommandé)**
+### Production
 ```bash
-docker-compose up postgres
+# Construire les images Docker
+docker-compose -f docker-compose.prod.yml build
+
+# Démarrer en production
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### 2. Configuration du backend
-
-Modifiez `backend/src/main/resources/application.yml` :
-```yaml
-spring:
-  datasource:
-    username: nfc4care
-    password: nfc4care
-
-blockfrost:
-  api:
-    key: VOTRE_CLE_BLOCKFROST_API
-```
-
-### 3. Configuration du frontend
-
-Copiez le fichier d'environnement :
-```bash
-cd frontend
-cp env.example .env
-```
-
-### 4. Démarrage des applications
-
-#### Option A : Script automatique (recommandé)
-
-**Windows :**
-```bash
-start-apps.bat
-```
-
-**Linux/Mac :**
-```bash
-chmod +x start-apps.sh
-./start-apps.sh
-```
-
-#### Option B : Docker Compose (recommandé pour production)
-```bash
-docker-compose up --build
-```
-
-#### Option C : Démarrage manuel
-
-**Backend :**
-```bash
-cd backend
-./start.sh  # Linux/Mac
-# ou
-start.bat   # Windows
-```
-
-**Frontend :**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## 🌐 Accès aux applications
-
-- **Frontend** : http://localhost:5173
-- **Backend API** : http://localhost:8080/api
-- **Base de données** : localhost:5432
-
-## 🔐 Authentification
-
-**Utilisateur par défaut :**
-- **Email** : `doctor@example.com`
-- **Mot de passe** : `password`
-
-## 📱 Fonctionnalités Principales
-
-### 🔍 Scanner NFC
-- **Identification rapide** des patients via tags NFC
-- **Simulation NFC** en mode développement
-- **Intégration** avec les dossiers médicaux
-
-### ⛓️ Blockchain Cardano
-- **Sécurisation** des données médicales
-- **Traçabilité** complète des modifications
-- **Vérification d'intégrité** des dossiers
-- **Métadonnées sécurisées** sur Cardano
-
-### 📊 Dashboard Médical
-- **Statistiques** en temps réel
-- **Patients récents**
-- **Alertes** et notifications
-- **Interface** intuitive et moderne
-
-### 👥 Gestion des Patients
-- **Recherche avancée** de patients
-- **Dossiers médicaux** complets
-- **Historique** des consultations
-- **Informations** personnelles sécurisées
-
-### 🔐 Sécurité
-- **Authentification JWT** sécurisée
-- **Rôles** et permissions
-- **Chiffrement** des données sensibles
-- **Audit trail** complet
-
-## 🔧 API Endpoints
-
-### Authentification
-- `POST /api/auth/login` - Connexion sécurisée
-- `POST /api/auth/logout` - Déconnexion
-
-### Patients
-- `GET /api/patients` - Liste des patients
-- `GET /api/patients/{id}` - Détails d'un patient
-- `GET /api/patients/nfc/{numeroNFC}` - Patient par NFC
-- `GET /api/patients/search?q={term}` - Recherche avancée
-- `POST /api/patients` - Créer un patient
-- `PUT /api/patients/{id}` - Modifier un patient
-
-### Blockchain
-- `GET /api/blockchain/verify/{id}` - Vérifier l'intégrité
-
-## 🗄️ Structure de la base de données
-
-### Tables principales
-- **professionnels** - Professionnels de santé authentifiés
-- **patients** - Informations patients avec tags NFC
-- **dossiers_medicaux** - Dossiers médicaux sécurisés
-- **consultations** - Historique des consultations
-
-### Données de test
-Le script d'initialisation crée automatiquement :
-- 1 professionnel de santé par défaut
-- 4 patients de test avec dossiers médicaux
-- Tags NFC de test pour démonstration
-
-## 🔗 Intégration Blockchain Cardano
-
-### Fonctionnement
-1. **Génération de hash** SHA-256 du contenu médical
-2. **Transaction Cardano** via Blockfrost API
-3. **Métadonnées** : `{patient_id, action, hash, author_id, timestamp}`
-4. **Stockage** du hash de transaction en base
-5. **Vérification** d'intégrité en temps réel
-
-### Avantages de Cardano
-- **Sécurité** : Preuve de participation (PoS)
-- **Durabilité** : Blockchain permanente
-- **Interopérabilité** : Standards ouverts
-- **Évolutivité** : Réseau performant
-
-### Configuration Blockfrost
-1. Créez un compte sur [Blockfrost.io](https://blockfrost.io)
-2. Générez une clé API pour le réseau Cardano mainnet
-3. Ajoutez la clé dans `application.yml`
-
-## 🧪 Tests
-
-### Frontend
-```bash
-cd frontend
-npm test
-```
-
-### Backend
-```bash
-cd backend
-mvn test
-```
-
-## 🚨 Sécurité en production
-
-1. **Changer la clé JWT** dans `application.yml`
-2. **Configurer HTTPS** avec certificats SSL
-3. **Limiter les origines CORS** strictement
-4. **Configurer un firewall** approprié
-5. **Sauvegarder régulièrement** la base de données
-6. **Monitorer les logs** et accès
-7. **Audit de sécurité** régulier
-
-## 🔧 Développement
-
-### Ajout de nouvelles fonctionnalités
-
-1. **Backend** : Créer entité → Repository → Service → Controller
-2. **Frontend** : Créer composant → Service API → Page
-3. **Tests** : Tests unitaires et d'intégration
-4. **Blockchain** : Intégrer les nouvelles données
+## 🔧 Configuration
 
 ### Variables d'environnement
 
-**Frontend** : `frontend/.env`
-```
-VITE_API_BASE_URL=http://localhost:8080/api
-VITE_DEV_MODE=true
-VITE_ENABLE_MOCK_NFC=true
-```
-
-**Backend** : `backend/src/main/resources/application.yml`
-```yaml
-spring:
-  profiles:
-    active: dev
+#### Frontend (.env)
+```env
+VITE_API_URL=http://localhost:8080/api
+VITE_APP_NAME=NFC4Care
 ```
 
-## 📞 Support et Contribution
+#### Backend (application.properties)
+```properties
+# Base de données
+spring.datasource.url=jdbc:postgresql://localhost:5432/nfc4care
+spring.datasource.username=nfc4care
+spring.datasource.password=nfc4care
 
-Pour toute question ou problème :
-- Vérifiez les logs de l'application
-- Consultez la documentation Blockfrost
-- Vérifiez la configuration PostgreSQL
-- Consultez les issues GitHub
+# JWT
+jwt.secret=your-secret-key
+jwt.expiration=86400000
+
+# Blockchain
+blockfrost.api.key=your-blockfrost-api-key
+blockfrost.network=testnet
+```
+
+## 📈 Statistiques du projet
+
+- **10 patients** avec dossiers médicaux complets
+- **12 consultations** récentes avec données détaillées
+- **4 professionnels** de santé de différentes spécialités
+- **100% des données simulées** remplacées par des données réelles
+- **Interface complètement nettoyée** sans boutons inutiles
+- **Recherche en temps réel** optimisée
+- **Prêt pour le déploiement** en production
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
 
 ## 📄 Licence
 
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## 📞 Support
+
+Pour toute question ou problème :
+- Ouvrir une issue sur GitHub
+- Contacter l'équipe de développement
+- Consulter la documentation API
 
 ---
 
-**NFC4Care** - Sécuriser la gestion médicale avec la blockchain Cardano 🏥🔗⛓️
-
-*Une solution innovante pour la sécurité et la traçabilité des données médicales.*
+**NFC4Care** - Révolutionner la gestion médicale avec la technologie NFC et blockchain 🏥✨

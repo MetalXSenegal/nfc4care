@@ -1,27 +1,23 @@
 # Dockerfile pour NFC4Care Backend
 FROM openjdk:17-jdk-slim
 
+# Installer Maven
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+
 # Définir le répertoire de travail
 WORKDIR /app
 
 # Copier le fichier pom.xml
 COPY pom.xml .
 
-# Copier le wrapper Maven
-COPY .mvn .mvn
-COPY mvnw .
-
-# Rendre le wrapper exécutable
-RUN chmod +x mvnw
-
 # Télécharger les dépendances
-RUN ./mvnw dependency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 # Copier le code source
 COPY src src
 
 # Compiler l'application
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Exposer le port
 EXPOSE 8080

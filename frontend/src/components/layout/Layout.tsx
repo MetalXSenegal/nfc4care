@@ -1,39 +1,32 @@
-import React, { ReactNode } from 'react';
-import { Activity } from 'lucide-react';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { useAuth } from '../../context/AuthContext';
+import MobileHeader from './MobileHeader';
+import BottomNavigation from './BottomNavigation';
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-
-  // If not authenticated, just render children (which should be Login page)
-  if (!isAuthenticated) {
-    return <>{children}</>;
-  }
-
+const Layout: React.FC = () => {
   return (
-    <div className="flex h-screen bg-gray-50">
-      <div className="hidden md:flex md:w-64 md:flex-col">
+    <div className="min-h-screen bg-gray-50">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
         <Sidebar />
       </div>
       
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Mobile header with menu */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
-          <div className="flex items-center">
-            <Activity className="h-6 w-6 text-blue-600" />
-            <h1 className="ml-2 text-lg font-bold">NFC4Care</h1>
-          </div>
-          {/* Mobile menu button could go here */}
-        </div>
-        
-        <main className="flex-1 overflow-auto bg-white">
-          {children}
+      {/* Mobile Header */}
+      <div className="lg:hidden">
+        <MobileHeader />
+      </div>
+      
+      {/* Main Content */}
+      <div className="lg:ml-64">
+        <main className="min-h-screen pb-20 lg:pb-0">
+          <Outlet />
         </main>
+      </div>
+      
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden">
+        <BottomNavigation />
       </div>
     </div>
   );

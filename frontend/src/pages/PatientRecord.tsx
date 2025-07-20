@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PatientHeader from '../components/patient/PatientHeader';
 import MedicalTabs from '../components/patient/MedicalTabs';
+import NFCWriter from '../components/nfc/NFCWriter';
 import Button from '../components/ui/Button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, CreditCard } from 'lucide-react';
 import { apiService } from '../services/api';
 
 interface Patient {
@@ -17,6 +18,7 @@ interface Patient {
   telephone: string;
   email?: string;
   groupeSanguin?: string;
+  numeroNfc?: string;
 }
 
 interface MedicalRecord {
@@ -39,6 +41,7 @@ const PatientRecord: React.FC = () => {
   const [medicalRecord, setMedicalRecord] = useState<MedicalRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showNFCWriter, setShowNFCWriter] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,6 +83,16 @@ const PatientRecord: React.FC = () => {
     fetchData();
   }, [id]);
 
+  const handleNFCSuccess = () => {
+    // Optionnel: mettre à jour l'interface ou afficher une notification
+    console.log('Carte NFC écrite avec succès');
+  };
+
+  const handleNFCError = (error: string) => {
+    console.error('Erreur NFC:', error);
+    // Optionnel: afficher une notification d'erreur
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -110,7 +123,7 @@ const PatientRecord: React.FC = () => {
       <PatientHeader patient={patient} />
       
       <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="mb-6">
+        <div className="mb-6 flex justify-between items-center">
           <Button
             variant="outline"
             size="sm"
@@ -119,9 +132,33 @@ const PatientRecord: React.FC = () => {
           >
             Retour au tableau de bord
           </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<CreditCard size={16} />}
+            onClick={() => setShowNFCWriter(!showNFCWriter)}
+          >
+            {showNFCWriter ? 'Masquer' : 'Écrire'} Carte NFC
+          </Button>
         </div>
         
         <div className="space-y-6">
+          {showNFCWriter && (
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Configuration Carte NFC
+              </h2>
+              <NFCWriter
+                patientId={patient.id}
+                patientName={`${patient.prenom} ${patient.nom}`}
+                nfcId={patient.numeroNfc || `nfc-${patient.id}`}
+                onSuccess={handleNFCSuccess}
+                onError={handleNFCError}
+              />
+            </div>
+          )}
+          
           <MedicalTabs medicalRecord={medicalRecord} />
         </div>
       </div>
