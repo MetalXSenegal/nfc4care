@@ -1,11 +1,16 @@
 package com.nfc4care.controller;
 
+import com.nfc4care.dto.ApiResponse;
+import com.nfc4care.dto.PagedResponse;
 import com.nfc4care.dto.PatientDto;
 import com.nfc4care.entity.Patient;
 import com.nfc4care.service.PatientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,15 +28,20 @@ public class PatientController {
     
     @GetMapping
     @PreAuthorize("hasRole('MEDECIN')")
-    public ResponseEntity<List<Patient>> getAllPatients() {
-        log.info("Récupération de tous les patients");
+    public ResponseEntity<ApiResponse<PagedResponse<Patient>>> getAllPatients(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("Récupération des patients - page: {}, size: {}", page, size);
         try {
-            List<Patient> patients = patientService.getAllPatients();
-            log.info("✅ {} patients récupérés", patients.size());
-            return ResponseEntity.ok(patients);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Patient> patients = patientService.getAllPatientsPaginated(pageable);
+            log.info("✅ {} patients récupérés (page {}/{})",
+                patients.getContent().size(), patients.getNumber() + 1, patients.getTotalPages());
+            return ResponseEntity.ok(ApiResponse.success(PagedResponse.of(patients)));
         } catch (Exception e) {
             log.error("❌ Erreur lors de la récupération des patients", e);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("ERROR", e.getMessage()));
         }
     }
     

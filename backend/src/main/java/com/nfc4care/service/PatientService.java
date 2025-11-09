@@ -5,6 +5,8 @@ import com.nfc4care.entity.Patient;
 import com.nfc4care.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,11 +16,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class PatientService {
-    
+
     private final PatientRepository patientRepository;
-    
+
     public List<Patient> getAllPatients() {
         return patientRepository.findAll();
+    }
+
+    public Page<Patient> getAllPatientsPaginated(Pageable pageable) {
+        return patientRepository.findAll(pageable);
     }
     
     public Optional<Patient> getPatientById(Long id) {

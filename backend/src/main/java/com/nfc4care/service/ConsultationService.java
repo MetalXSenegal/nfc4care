@@ -9,6 +9,7 @@ import com.nfc4care.entity.Professionnel;
 import com.nfc4care.repository.ConsultationRepository;
 import com.nfc4care.repository.DossierMedicalRepository;
 import com.nfc4care.repository.ProfessionnelRepository;
+import com.nfc4care.util.HashUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
@@ -43,24 +44,34 @@ public class ConsultationService {
     }
     
     public Consultation createConsultation(ConsultationDto consultationDto) {
-        log.info("Création d'une nouvelle consultation");
-        
+        log.info("Création d'une nouvelle consultation pour le dossier: {}", consultationDto.getDossierMedicalId());
+
         // Récupérer le dossier médical
         DossierMedical dossierMedical = dossierMedicalRepository.findById(consultationDto.getDossierMedicalId())
             .orElseThrow(() -> new RuntimeException("Dossier médical non trouvé"));
-        
-        // Récupérer le professionnel (pour l'instant, on utilise le premier disponible)
-        List<Professionnel> professionnels = professionnelRepository.findAll();
-        if (professionnels.isEmpty()) {
-            throw new RuntimeException("Aucun professionnel disponible");
+
+        // Récupérer le professionnel
+        Professionnel professionnel;
+        if (consultationDto.getProfessionnelId() != null) {
+            // Utiliser le professionnel spécifié
+            professionnel = professionnelRepository.findById(consultationDto.getProfessionnelId())
+                .orElseThrow(() -> new RuntimeException("Professionnel avec l'ID " + consultationDto.getProfessionnelId() + " non trouvé"));
+        } else {
+            // Fallback: utiliser le professionnel actif courant (depuis le contexte de sécurité en production)
+            // Pour les tests: utiliser le premier disponible
+            List<Professionnel> professionnels = professionnelRepository.findAll();
+            if (professionnels.isEmpty()) {
+                throw new RuntimeException("Aucun professionnel disponible");
+            }
+            professionnel = professionnels.get(0);
+            log.warn("⚠️ Aucun professionnelId fourni, utilisation du premier professionnel disponible: {}", professionnel.getId());
         }
-        Professionnel professionnel = professionnels.get(0);
-        
+
         // Créer la consultation
         Consultation consultation = new Consultation();
         consultation.setDossierMedical(dossierMedical);
         consultation.setProfessionnel(professionnel);
-        consultation.setDateConsultation(consultationDto.getDateConsultation() != null ? 
+        consultation.setDateConsultation(consultationDto.getDateConsultation() != null ?
             consultationDto.getDateConsultation() : LocalDateTime.now());
         consultation.setMotifConsultation(consultationDto.getMotifConsultation());
         consultation.setExamenClinique(consultationDto.getExamenClinique());
@@ -69,38 +80,26 @@ public class ConsultationService {
         consultation.setOrdonnance(consultationDto.getOrdonnance());
         consultation.setObservations(consultationDto.getObservations());
         consultation.setProchainRdv(consultationDto.getProchainRdv());
-        
-        // Générer le hash du contenu (simplifié)
-        String content = consultationDto.getMotifConsultation() + 
-                        (consultationDto.getDiagnostic() != null ? consultationDto.getDiagnostic() : "") + 
+
+        // Générer le hash du contenu avec la classe utilitaire
+        String content = (consultationDto.getMotifConsultation() != null ? consultationDto.getMotifConsultation() : "") +
+                        (consultationDto.getDiagnostic() != null ? consultationDto.getDiagnostic() : "") +
                         (consultationDto.getTraitementPrescrit() != null ? consultationDto.getTraitementPrescrit() : "");
-        try {
-            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(content.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashBytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            consultation.setHashContenu(hexString.toString());
-        } catch (Exception e) {
-            log.error("Erreur lors de la génération du hash", e);
-            consultation.setHashContenu("error");
-        }
-        
+        consultation.setHashContenu(HashUtil.generateSHA256Hash(content));
+
         Consultation savedConsultation = consultationRepository.save(consultation);
-        log.info("✅ Consultation créée avec l'ID: {}", savedConsultation.getId());
-        
+        log.info("✅ Consultation créée avec l'ID: {} par le professionnel: {}",
+            savedConsultation.getId(), professionnel.getEmail());
+
         return savedConsultation;
     }
     
     public Consultation updateConsultation(Long id, ConsultationDto consultationDto) {
         log.info("Mise à jour de la consultation: {}", id);
-        
+
         Consultation consultation = consultationRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Consultation non trouvée"));
-        
+
         // Mettre à jour les champs
         if (consultationDto.getDateConsultation() != null) {
             consultation.setDateConsultation(consultationDto.getDateConsultation());
@@ -126,29 +125,23 @@ public class ConsultationService {
         if (consultationDto.getProchainRdv() != null) {
             consultation.setProchainRdv(consultationDto.getProchainRdv());
         }
-        
-        // Mettre à jour le hash du contenu
-        String content = consultation.getMotifConsultation() + 
-                        consultation.getDiagnostic() + 
-                        consultation.getTraitementPrescrit();
-        try {
-            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(content.getBytes());
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hashBytes) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            consultation.setHashContenu(hexString.toString());
-        } catch (Exception e) {
-            log.error("Erreur lors de la génération du hash", e);
-            consultation.setHashContenu("error");
+
+        // Mettre à jour le professionnel si fourni
+        if (consultationDto.getProfessionnelId() != null) {
+            Professionnel professionnel = professionnelRepository.findById(consultationDto.getProfessionnelId())
+                .orElseThrow(() -> new RuntimeException("Professionnel non trouvé"));
+            consultation.setProfessionnel(professionnel);
         }
-        
+
+        // Mettre à jour le hash du contenu
+        String content = (consultation.getMotifConsultation() != null ? consultation.getMotifConsultation() : "") +
+                        (consultation.getDiagnostic() != null ? consultation.getDiagnostic() : "") +
+                        (consultation.getTraitementPrescrit() != null ? consultation.getTraitementPrescrit() : "");
+        consultation.setHashContenu(HashUtil.generateSHA256Hash(content));
+
         Consultation updatedConsultation = consultationRepository.save(consultation);
         log.info("✅ Consultation mise à jour");
-        
+
         return updatedConsultation;
     }
     
