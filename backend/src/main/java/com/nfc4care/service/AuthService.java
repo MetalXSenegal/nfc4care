@@ -17,11 +17,12 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
-    
+
     private final ProfessionnelRepository professionnelRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final TotpService totpService;
     
     public AuthResponse authenticate(AuthRequest request) {
         authenticationManager.authenticate(
@@ -55,23 +56,32 @@ public class AuthService {
     }
     
     public AuthResponse verify2FA(String code, String token) {
-        // Pour l'instant, on simule la vérification 2FA
-        // En production, vous implémenteriez la vraie logique 2FA
-        
-        if (!"123456".equals(code)) {
-            throw new RuntimeException("Code 2FA invalide");
-        }
-        
         // Extraire les informations du token pour récupérer le professionnel
         String email = jwtService.extractUsername(token);
         Professionnel professionnel = professionnelRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Professionnel non trouvé"));
-        
+
         // Vérifier que le token est valide
         if (!jwtService.isTokenValid(token, professionnel)) {
             throw new RuntimeException("Token invalide ou expiré");
         }
-        
+
+        // Vérifier la 2FA si elle est activée
+        if (professionnel.isTwoFaEnabled()) {
+            if (professionnel.getTwoFaSecret() == null || !totpService.validateTotp(professionnel.getTwoFaSecret(), code)) {
+                log.warn("❌ Tentative de vérification 2FA échouée pour: {}", email);
+                throw new RuntimeException("Code 2FA invalide");
+            }
+            log.info("✅ Code 2FA validé pour: {}", email);
+        } else {
+            // Si 2FA n'est pas activée, accepter le code "000000" pour les tests
+            if (!"000000".equals(code)) {
+                log.warn("❌ Tentative sans 2FA valide pour: {}", email);
+                throw new RuntimeException("2FA non activé pour cet utilisateur ou code invalide");
+            }
+            log.info("✅ Authentification sans 2FA acceptée (mode test)");
+        }
+
         return AuthResponse.builder()
                 .token(token)
                 .professionnelId(professionnel.getId())

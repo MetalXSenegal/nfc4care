@@ -17,6 +17,8 @@ public class ConsultationDto {
     @NotNull(message = "L'ID du dossier médical est obligatoire")
     private Long dossierMedicalId;
     
+    private Long professionnelId;
+    
     @NotBlank(message = "Le motif de consultation est obligatoire")
     private String motifConsultation;
     
@@ -37,4 +39,13 @@ public class ConsultationDto {
     private String hashContenu;
     
     private String blockchainTxnHash;
+    
+    private LocalDateTime dateCreation;
+    
+    private LocalDateTime dateModification;
+    
+    // Données complètes pour l'affichage
+    private PatientDto patient;
+    
+    private ProfessionnelDto professionnel;
 } 

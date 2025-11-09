@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/consultations")
@@ -22,8 +23,8 @@ public class ConsultationController {
     private final ConsultationService consultationService;
     
     @GetMapping
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<List<Consultation>> getAllConsultations(@RequestParam(required = false) String patientId) {
+    @PreAuthorize("hasRole('MEDECIN')")
+    public ResponseEntity<List<ConsultationDto>> getAllConsultations(@RequestParam(required = false) String patientId) {
         log.info("Récupération des consultations - patientId: {}", patientId);
         
         try {
@@ -34,8 +35,13 @@ public class ConsultationController {
                 consultations = consultationService.getAllConsultations();
             }
             
-            log.info("✅ {} consultations récupérées", consultations.size());
-            return ResponseEntity.ok(consultations);
+            List<ConsultationDto> consultationDtos = consultations.stream()
+                .map(consultationService::toDto)
+                .collect(Collectors.toList());
+            
+            log.info("✅ {} consultations récupérées", consultationDtos.size());
+            log.info("consultationDtos: {}", consultationDtos);
+            return ResponseEntity.ok(consultationDtos);
         } catch (Exception e) {
             log.error("❌ Erreur lors de la récupération des consultations", e);
             return ResponseEntity.internalServerError().build();
@@ -43,15 +49,15 @@ public class ConsultationController {
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<Consultation> getConsultationById(@PathVariable Long id) {
+    @PreAuthorize("hasRole('MEDECIN')")
+    public ResponseEntity<ConsultationDto> getConsultationById(@PathVariable Long id) {
         log.info("Récupération de la consultation avec l'ID: {}", id);
         
         try {
             Optional<Consultation> consultation = consultationService.getConsultationById(id);
             if (consultation.isPresent()) {
                 log.info("✅ Consultation trouvée");
-                return ResponseEntity.ok(consultation.get());
+                return ResponseEntity.ok(consultationService.toDto(consultation.get()));
             } else {
                 log.info("❌ Consultation non trouvée");
                 return ResponseEntity.notFound().build();
@@ -63,14 +69,14 @@ public class ConsultationController {
     }
     
     @PostMapping
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<Consultation> createConsultation(@Valid @RequestBody ConsultationDto consultationDto) {
+    @PreAuthorize("hasRole('MEDECIN')")
+    public ResponseEntity<ConsultationDto> createConsultation(@Valid @RequestBody ConsultationDto consultationDto) {
         log.info("Création d'une nouvelle consultation pour le dossier: {}", consultationDto.getDossierMedicalId());
         
         try {
             Consultation createdConsultation = consultationService.createConsultation(consultationDto);
             log.info("✅ Consultation créée avec l'ID: {}", createdConsultation.getId());
-            return ResponseEntity.ok(createdConsultation);
+            return ResponseEntity.ok(consultationService.toDto(createdConsultation));
         } catch (Exception e) {
             log.error("❌ Erreur lors de la création de la consultation", e);
             return ResponseEntity.badRequest().build();
@@ -78,14 +84,14 @@ public class ConsultationController {
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<Consultation> updateConsultation(@PathVariable Long id, @Valid @RequestBody ConsultationDto consultationDto) {
+    @PreAuthorize("hasRole('MEDECIN')")
+    public ResponseEntity<ConsultationDto> updateConsultation(@PathVariable Long id, @Valid @RequestBody ConsultationDto consultationDto) {
         log.info("Mise à jour de la consultation avec l'ID: {}", id);
         
         try {
             Consultation updatedConsultation = consultationService.updateConsultation(id, consultationDto);
             log.info("✅ Consultation mise à jour");
-            return ResponseEntity.ok(updatedConsultation);
+            return ResponseEntity.ok(consultationService.toDto(updatedConsultation));
         } catch (Exception e) {
             log.error("❌ Erreur lors de la mise à jour de la consultation", e);
             return ResponseEntity.badRequest().build();
@@ -93,7 +99,7 @@ public class ConsultationController {
     }
     
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('MEDECIN')")
     public ResponseEntity<Void> deleteConsultation(@PathVariable Long id) {
         log.info("Suppression de la consultation avec l'ID: {}", id);
         

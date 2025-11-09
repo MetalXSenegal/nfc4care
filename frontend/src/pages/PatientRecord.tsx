@@ -60,18 +60,14 @@ const PatientRecord: React.FC = () => {
         
         setPatient(patientResponse.data);
         
-        // Pour l'instant, on simule un dossier médical
-        // En production, vous auriez un endpoint pour récupérer le dossier médical
-        const mockMedicalRecord: MedicalRecord = {
-          id: '1',
-          patientId: id,
-          antecedentsMedicaux: 'Aucun antécédent médical notable',
-          allergies: 'Aucune allergie connue',
-          hashContenu: 'abc123...',
-          blockchainTxnHash: 'txn_hash_123'
-        };
-        
-        setMedicalRecord(mockMedicalRecord);
+        // Récupérer le dossier médical réel
+        const medicalRecordResponse = await apiService.getMedicalRecord(id);
+        if (!medicalRecordResponse.success || !medicalRecordResponse.data) {
+          setError('Dossier médical non trouvé');
+          setLoading(false);
+          return;
+        }
+        setMedicalRecord(medicalRecordResponse.data);
       } catch (err) {
         console.error('Erreur lors du chargement des données:', err);
         setError('Erreur lors du chargement des données');

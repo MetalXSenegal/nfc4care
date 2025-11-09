@@ -1,5 +1,6 @@
 package com.nfc4care.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -55,7 +56,14 @@ public class Professionnel implements UserDetails {
     
     @Column(nullable = false)
     private boolean actif = true;
-    
+
+    @Column(name = "two_fa_secret")
+    @JsonIgnore
+    private String twoFaSecret; // Secret key for TOTP (base32 encoded)
+
+    @Column(name = "two_fa_enabled")
+    private boolean twoFaEnabled = false;
+
     @PrePersist
     protected void onCreate() {
         dateCreation = LocalDateTime.now();
@@ -89,6 +97,12 @@ public class Professionnel implements UserDetails {
     @Override
     public boolean isEnabled() {
         return actif;
+    }
+    
+    // Ignorer cette propriété lors de la sérialisation JSON pour éviter les problèmes avec les proxies Hibernate
+    @JsonIgnore
+    public Object getHibernateLazyInitializer() {
+        return null;
     }
     
     public enum Role {

@@ -1,45 +1,49 @@
 spring:
   application:
     name: nfc4care-backend
-  
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/nfc4care
-    username: nfc4care
-    password: nfc4care
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nfc4care}
+    username: ${DB_USERNAME:nfc4care}
+    password: ${DB_PASSWORD:nfc4care}
     driver-class-name: org.postgresql.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  
+
   security:
     jwt:
-      secret: nfc4care-super-secret-jwt-key-2024-very-long-and-secure
-      expiration: 86400000 # 24 hours in milliseconds
+      secret: ${JWT_SECRET:nfc4care-super-secret-jwt-key-2024-very-long-and-secure}
+      expiration: ${JWT_EXPIRATION:86400000}
 
 # Blockfrost API Configuration
 blockfrost:
   api:
-    key: YOUR_BLOCKFROST_API_KEY_HERE
+    key: ${BLOCKFROST_API_KEY:YOUR_BLOCKFROST_API_KEY_HERE}
     base-url: https://cardano-mainnet.blockfrost.io/api/v0
-    network: mainnet
+    network: ${BLOCKFROST_NETWORK:mainnet}
 
 # Server Configuration
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /api
+
+# CORS Configuration
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
 
 # Logging
 logging:
   level:
-    com.nfc4care: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
+    com.nfc4care: ${LOG_LEVEL_APP:INFO}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:INFO}
+    org.springframework.web: ${LOG_LEVEL_WEB:INFO}
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n" 

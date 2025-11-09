@@ -6,6 +6,8 @@ import { useErrorHandler } from '../hooks/useErrorHandler';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { Consultation, Patient } from '../types';
 
+type DateInput = string | number[];
+
 interface ConsultationWithPatient extends Consultation {
   patient?: Patient;
   professionnel?: {
@@ -47,11 +49,26 @@ const History: React.FC = () => {
   const groupByDate = (entries: ConsultationWithPatient[]) => {
     const grouped: { [key: string]: ConsultationWithPatient[] } = {};
     entries.forEach(entry => {
-      const date = entry.dateConsultation.split('T')[0];
-      if (!grouped[date]) {
-        grouped[date] = [];
+      let dateString: string;
+      
+      // Gérer les différents formats de date (chaîne ou tableau)
+      if (typeof entry.dateConsultation === 'string') {
+        dateString = entry.dateConsultation.split('T')[0];
+      } else if (Array.isArray(entry.dateConsultation)) {
+        // Convertir le tableau en objet Date puis en chaîne ISO
+        const dateArray = entry.dateConsultation as number[];
+        const [year, month, day] = dateArray;
+        const date = new Date(year, month - 1, day); // month - 1 car les mois commencent à 0
+        dateString = date.toISOString().split('T')[0];
+      } else {
+        // Fallback: utiliser la date actuelle
+        dateString = new Date().toISOString().split('T')[0];
       }
-      grouped[date].push(entry);
+      
+      if (!grouped[dateString]) {
+        grouped[dateString] = [];
+      }
+      grouped[dateString].push(entry);
     });
     return grouped;
   };
@@ -61,8 +78,19 @@ const History: React.FC = () => {
     new Date(b).getTime() - new Date(a).getTime()
   );
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', { 
+  const formatDate = (dateInput: DateInput) => {
+    let date: Date;
+    
+    if (typeof dateInput === 'string') {
+      date = new Date(dateInput);
+    } else if (Array.isArray(dateInput)) {
+      const [year, month, day] = dateInput;
+      date = new Date(year, month - 1, day);
+    } else {
+      date = new Date();
+    }
+    
+    return date.toLocaleDateString('fr-FR', { 
       weekday: 'long', 
       year: 'numeric', 
       month: 'long', 
@@ -70,8 +98,19 @@ const History: React.FC = () => {
     });
   };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('fr-FR', { 
+  const formatTime = (dateInput: DateInput) => {
+    let date: Date;
+    
+    if (typeof dateInput === 'string') {
+      date = new Date(dateInput);
+    } else if (Array.isArray(dateInput)) {
+      const [year, month, day, hour, minute] = dateInput;
+      date = new Date(year, month - 1, day, hour, minute);
+    } else {
+      date = new Date();
+    }
+    
+    return date.toLocaleTimeString('fr-FR', { 
       hour: '2-digit', 
       minute: '2-digit' 
     });

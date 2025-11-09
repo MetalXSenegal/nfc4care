@@ -22,7 +22,7 @@ public class PatientController {
     private final PatientService patientService;
     
     @GetMapping
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('MEDECIN')")
     public ResponseEntity<List<Patient>> getAllPatients() {
         log.info("Récupération de tous les patients");
         try {
@@ -36,7 +36,7 @@ public class PatientController {
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('MEDECIN')")
     public ResponseEntity<Patient> getPatientById(@PathVariable Long id) {
         log.info("Récupération du patient avec l'ID: {}", id);
         try {
@@ -55,7 +55,7 @@ public class PatientController {
     }
     
     @GetMapping("/nfc/{numeroNFC}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('MEDECIN')")
     public ResponseEntity<Patient> getPatientByNFC(@PathVariable String numeroNFC) {
         log.info("Récupération du patient par NFC: {}", numeroNFC);
         try {
@@ -74,7 +74,7 @@ public class PatientController {
     }
     
     @GetMapping("/search")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('MEDECIN')")
     public ResponseEntity<List<Patient>> searchPatients(@RequestParam String q) {
         log.info("Recherche de patients avec le terme: {}", q);
         try {
@@ -88,7 +88,7 @@ public class PatientController {
     }
     
     @PostMapping
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('MEDECIN')")
     public ResponseEntity<Patient> createPatient(@Valid @RequestBody PatientDto patientDto) {
         log.info("Création d'un nouveau patient: {}", patientDto.getNom());
         try {
@@ -102,7 +102,7 @@ public class PatientController {
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('MEDECIN')")
     public ResponseEntity<Patient> updatePatient(@PathVariable Long id, @Valid @RequestBody PatientDto patientDto) {
         log.info("Mise à jour du patient avec l'ID: {}", id);
         try {
@@ -116,7 +116,7 @@ public class PatientController {
     }
     
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('MEDECIN')")
     public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
         log.info("Suppression du patient avec l'ID: {}", id);
         try {

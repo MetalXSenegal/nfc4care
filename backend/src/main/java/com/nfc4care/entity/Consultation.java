@@ -1,5 +1,6 @@
 package com.nfc4care.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -71,5 +72,11 @@ public class Consultation {
     @PreUpdate
     protected void onUpdate() {
         dateModification = LocalDateTime.now();
+    }
+    
+    // Ignorer cette propriété lors de la sérialisation JSON pour éviter les problèmes avec les proxies Hibernate
+    @JsonIgnore
+    public Object getHibernateLazyInitializer() {
+        return null;
     }
 } 

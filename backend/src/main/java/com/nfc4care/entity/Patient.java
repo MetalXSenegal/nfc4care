@@ -1,5 +1,6 @@
 package com.nfc4care.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -60,6 +61,12 @@ public class Patient {
     
     @Column(nullable = false)
     private boolean actif = true;
+    
+    // Ignorer cette propriété lors de la sérialisation JSON pour éviter les problèmes avec les proxies Hibernate
+    @JsonIgnore
+    public Object getHibernateLazyInitializer() {
+        return null;
+    }
     
     @PrePersist
     protected void onCreate() {

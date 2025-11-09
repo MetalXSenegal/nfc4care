@@ -1,6 +1,8 @@
 package com.nfc4care.service;
 
 import com.nfc4care.dto.ConsultationDto;
+import com.nfc4care.dto.PatientDto;
+import com.nfc4care.dto.ProfessionnelDto;
 import com.nfc4care.entity.Consultation;
 import com.nfc4care.entity.DossierMedical;
 import com.nfc4care.entity.Professionnel;
@@ -9,6 +11,7 @@ import com.nfc4care.repository.DossierMedicalRepository;
 import com.nfc4care.repository.ProfessionnelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -158,5 +161,73 @@ public class ConsultationService {
         
         consultationRepository.deleteById(id);
         log.info("✅ Consultation supprimée");
+    }
+    
+    public ConsultationDto toDto(Consultation consultation) {
+        ConsultationDto dto = new ConsultationDto();
+        dto.setId(consultation.getId());
+        dto.setDossierMedicalId(consultation.getDossierMedical() != null ? consultation.getDossierMedical().getId() : null);
+        dto.setProfessionnelId(consultation.getProfessionnel() != null ? consultation.getProfessionnel().getId() : null);
+        dto.setDateConsultation(consultation.getDateConsultation());
+        dto.setMotifConsultation(consultation.getMotifConsultation());
+        dto.setExamenClinique(consultation.getExamenClinique());
+        dto.setDiagnostic(consultation.getDiagnostic());
+        dto.setTraitementPrescrit(consultation.getTraitementPrescrit());
+        dto.setOrdonnance(consultation.getOrdonnance());
+        dto.setObservations(consultation.getObservations());
+        dto.setProchainRdv(consultation.getProchainRdv());
+        dto.setHashContenu(consultation.getHashContenu());
+        dto.setBlockchainTxnHash(consultation.getBlockchainTxnHash());
+        dto.setDateCreation(consultation.getDateCreation());
+        dto.setDateModification(consultation.getDateModification());
+        
+        // Forcer l'initialisation des proxies Hibernate et ajouter les données du patient
+        if (consultation.getDossierMedical() != null) {
+            Hibernate.initialize(consultation.getDossierMedical());
+            if (consultation.getDossierMedical().getPatient() != null) {
+                Hibernate.initialize(consultation.getDossierMedical().getPatient());
+                dto.setPatient(toPatientDto(consultation.getDossierMedical().getPatient()));
+            }
+        }
+        
+        // Forcer l'initialisation des proxies Hibernate et ajouter les données du professionnel
+        if (consultation.getProfessionnel() != null) {
+            Hibernate.initialize(consultation.getProfessionnel());
+            dto.setProfessionnel(toProfessionnelDto(consultation.getProfessionnel()));
+        }
+        
+        return dto;
+    }
+    
+    private PatientDto toPatientDto(com.nfc4care.entity.Patient patient) {
+        PatientDto dto = new PatientDto();
+        dto.setId(patient.getId());
+        dto.setNumeroDossier(patient.getNumeroDossier());
+        dto.setNom(patient.getNom());
+        dto.setPrenom(patient.getPrenom());
+        dto.setDateNaissance(patient.getDateNaissance());
+        dto.setSexe(patient.getSexe());
+        dto.setAdresse(patient.getAdresse());
+        dto.setTelephone(patient.getTelephone());
+        dto.setEmail(patient.getEmail());
+        dto.setNumeroSecuriteSociale(patient.getNumeroSecuriteSociale());
+        dto.setGroupeSanguin(patient.getGroupeSanguin());
+        dto.setNumeroNFC(patient.getNumeroNFC());
+        return dto;
+    }
+    
+    private ProfessionnelDto toProfessionnelDto(Professionnel professionnel) {
+        ProfessionnelDto dto = new ProfessionnelDto();
+        dto.setId(professionnel.getId());
+        dto.setEmail(professionnel.getEmail());
+        dto.setNom(professionnel.getNom());
+        dto.setPrenom(professionnel.getPrenom());
+        dto.setSpecialite(professionnel.getSpecialite());
+        dto.setNumeroRPPS(professionnel.getNumeroRPPS());
+        dto.setRole(professionnel.getRole());
+        dto.setDateCreation(professionnel.getDateCreation());
+        dto.setDerniereConnexion(professionnel.getDerniereConnexion());
+        dto.setActif(professionnel.isActif());
+        return dto;
     }
 } 

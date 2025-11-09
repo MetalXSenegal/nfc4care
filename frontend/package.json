@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Frontend React pour l'application NFC4Care - Gestion médicale sécurisée avec NFC et blockchain",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

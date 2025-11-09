@@ -107,6 +107,21 @@ const SearchPatient: React.FC = () => {
     }
   };
 
+  // Charger tous les patients au montage si aucun terme de recherche
+  useEffect(() => {
+    if (searchTerm.trim().length === 0) {
+      setLoading(true);
+      apiService.getPatients().then(response => {
+        if (response.success && response.data) {
+          setSearchResults(response.data);
+        } else {
+          setSearchResults([]);
+        }
+        setLoading(false);
+      });
+    }
+  }, [searchTerm]);
+
   // Recherche en temps réel avec debounce - seulement si le terme fait plus de 2 caractères
   const debouncedSearch = useCallback(
     debounce((term: string) => {
@@ -131,8 +146,20 @@ const SearchPatient: React.FC = () => {
     }
   }, [searchTerm, debouncedSearch]);
 
-  const calculateAge = (dateNaissance: string) => {
-    const birthDate = new Date(dateNaissance);
+  // Fonction utilitaire pour parser la date (string ou tableau)
+  function parseDate(date: string | number[] | undefined): string {
+    if (Array.isArray(date) && date.length >= 3) {
+      const [year, month, day] = date;
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    if (typeof date === 'string') return date;
+    return '';
+  }
+
+  const calculateAge = (dateNaissance: string | number[] | undefined) => {
+    const dateStr = parseDate(dateNaissance);
+    if (!dateStr) return '?';
+    const birthDate = new Date(dateStr);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
@@ -144,8 +171,10 @@ const SearchPatient: React.FC = () => {
     return age;
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR');
+  const formatDate = (dateString: string | number[] | undefined) => {
+    const dateStr = parseDate(dateString);
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('fr-FR');
   };
 
   const formatPhone = (phone: string) => {

@@ -7,9 +7,6 @@ export interface ApiResponse<T> {
 }
 
 class ApiService {
-  private refreshPromise: Promise<boolean> | null = null;
-  private isRefreshing = false;
-
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('authToken');
     console.log('🔑 Token récupéré:', token ? `${token.substring(0, 20)}...` : 'Aucun token');
