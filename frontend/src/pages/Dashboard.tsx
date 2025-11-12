@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, History, CreditCard, User, Clock } from 'lucide-react';
+import { Search, History, CreditCard, User, Clock, Users, FileText, TrendingUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import StatsCard from '../components/dashboard/StatsCard';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,30 @@ const Dashboard: React.FC = () => {
     return 'Bonsoir';
   };
 
+  const stats = [
+    {
+      title: 'Patients aujourd\'hui',
+      value: '12',
+      icon: <Users className="h-5 w-5" />,
+      color: 'blue' as const,
+      trend: { value: '+3', positive: true }
+    },
+    {
+      title: 'Consultations',
+      value: '8',
+      icon: <FileText className="h-5 w-5" />,
+      color: 'green' as const,
+      trend: { value: '+2', positive: true }
+    },
+    {
+      title: 'Scans NFC',
+      value: '15',
+      icon: <CreditCard className="h-5 w-5" />,
+      color: 'purple' as const,
+      trend: { value: '+5', positive: true }
+    }
+  ];
+
   const quickActions = [
     {
       name: 'Rechercher un patient',
@@ -29,7 +54,8 @@ const Dashboard: React.FC = () => {
       href: '/search',
       color: 'bg-blue-500',
       textColor: 'text-blue-500',
-      primary: true
+      gradient: 'from-blue-500 to-blue-600',
+      primary: true,
     },
     {
       name: 'Scanner NFC',
@@ -37,7 +63,8 @@ const Dashboard: React.FC = () => {
       icon: CreditCard,
       href: '/nfc-scan',
       color: 'bg-green-500',
-      textColor: 'text-green-500'
+      textColor: 'text-green-500',
+      gradient: 'from-green-500 to-green-600',
     },
     {
       name: 'Historique',
@@ -45,61 +72,159 @@ const Dashboard: React.FC = () => {
       icon: History,
       href: '/history',
       color: 'bg-purple-500',
-      textColor: 'text-purple-500'
+      textColor: 'text-purple-500',
+      gradient: 'from-purple-500 to-purple-600',
+    }
+  ];
+
+  const recentActivities = [
+    {
+      type: 'consultation',
+      name: 'Sophie Laurent',
+      time: 'Il y a 2 heures',
+      icon: User,
+      iconColor: 'bg-blue-100 text-blue-600',
+      status: 'Terminée',
+      statusColor: 'bg-green-100 text-green-800',
+    },
+    {
+      type: 'scan',
+      name: 'Marc Dupont',
+      time: 'Il y a 4 heures',
+      icon: CreditCard,
+      iconColor: 'bg-green-100 text-green-600',
+      status: 'Identifié',
+      statusColor: 'bg-blue-100 text-blue-800',
+    },
+    {
+      type: 'search',
+      name: 'Recherche patient',
+      time: 'Il y a 6 heures',
+      icon: Search,
+      iconColor: 'bg-purple-100 text-purple-600',
+      status: 'Recherche',
+      statusColor: 'bg-gray-100 text-gray-800',
     }
   ];
 
   return (
-    <div className="py-4 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* En-tête */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {getGreeting()}, {getDoctorName()} 👋
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Bienvenue dans votre espace médical
-              </p>
-            </div>
-            <div className="flex items-center text-sm text-gray-500 mt-2 sm:mt-0">
-              <Clock className="h-4 w-4 mr-1" />
-              {new Date().toLocaleDateString('fr-FR', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
+        {/* Bannière Hero améliorée */}
+        <div className="mb-8 rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 relative">
+          {/* Pattern décoratif */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full -ml-24 -mb-24"></div>
+          </div>
+          
+          <div className="relative p-8 sm:p-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <div className="bg-white rounded-full p-4 shadow-2xl flex items-center justify-center ring-4 ring-white/20">
+                <img
+                  src="/assets/logo.png"
+                  alt="NFC4Care Logo"
+                  className="h-16 w-16 object-contain"
+                  loading="eager"
+                />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-3xl sm:text-4xl font-bold text-white">
+                    {getGreeting()}, {getDoctorName()} 👋
+                  </h1>
+                </div>
+                <p className="text-blue-100 text-lg mb-4">
+                  Bienvenue dans votre espace médical sécurisé
+                </p>
+                <div className="flex items-center gap-2 text-blue-100">
+                  <Clock className="h-5 w-5" />
+                  <span className="text-sm font-medium">
+                    {new Date().toLocaleDateString('fr-FR', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Actions rapides */}
+        {/* Statistiques */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">Aperçu</h2>
+            <TrendingUp className="h-5 w-5 text-gray-400" />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {quickActions.map((action) => {
+            {stats.map((stat, index) => (
+              <StatsCard
+                key={index}
+                title={stat.title}
+                value={stat.value}
+                icon={stat.icon}
+                color={stat.color}
+                trend={stat.trend}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Actions rapides améliorées */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Actions rapides</h2>
+              <p className="text-sm text-gray-500 mt-1">Accès rapide aux fonctionnalités principales</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {quickActions.map((action: any) => {
               const Icon = action.icon;
               return (
                 <button
                   key={action.name}
                   onClick={() => navigate(action.href)}
                   className={`
-                    bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow text-left
-                    ${action.primary ? 'border-blue-200 bg-blue-50' : ''}
+                    group relative bg-white rounded-2xl shadow-lg overflow-hidden 
+                    hover:shadow-2xl transition-all duration-300 text-left
+                    transform hover:-translate-y-1
+                    ${action.primary ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
                   `}
                 >
-                  <div className="flex items-center">
-                    <div className={`p-2 rounded-lg ${action.color} ${action.primary ? 'bg-opacity-20' : 'bg-opacity-10'}`}>
-                      <Icon className={`h-6 w-6 ${action.textColor}`} />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className={`font-medium text-gray-900 ${action.primary ? 'font-semibold' : ''}`}>
-                        {action.name}
-                        {action.primary && <span className="ml-2 text-blue-600">⭐</span>}
-                      </h3>
-                      <p className="text-sm text-gray-500">{action.description}</p>
+                  {/* Gradient background effect */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+                  
+                  {/* Content */}
+                  <div className="relative p-6">
+                    <div className="flex items-start gap-4">
+                      <div className={`
+                        p-4 rounded-2xl bg-gradient-to-br ${action.gradient} 
+                        shadow-lg group-hover:scale-110 transition-transform duration-300
+                        flex-shrink-0
+                      `}>
+                        <Icon className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className={`font-bold text-gray-900 ${action.primary ? 'text-lg' : 'text-base'}`}>
+                            {action.name}
+                          </h3>
+                          {action.primary && (
+                            <span className="text-yellow-400 text-lg">⭐</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed">{action.description}</p>
+                        <div className="mt-3 flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-600 transition-colors">
+                          <span>Accéder</span>
+                          <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -108,51 +233,54 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Section récente */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-4 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Activité récente</h2>
+        {/* Section activité récente améliorée */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="px-6 py-5 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Activité récente</h2>
+                <p className="text-sm text-gray-500 mt-1">Dernières actions effectuées</p>
+              </div>
+              <button 
+                onClick={() => navigate('/history')}
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                Voir tout
+              </button>
+            </div>
           </div>
-          <div className="p-4">
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-blue-600" />
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900">Consultation - Sophie Laurent</p>
-                  <p className="text-sm text-gray-500">Il y a 2 heures</p>
-                </div>
-                <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                  Terminée
-                </span>
-              </div>
-
-              <div className="flex items-center">
-                <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CreditCard className="h-4 w-4 text-green-600" />
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900">Scan NFC - Marc Dupont</p>
-                  <p className="text-sm text-gray-500">Il y a 4 heures</p>
-                </div>
-                <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                  Identifié
-                </span>
-              </div>
-
-              <div className="flex items-center">
-                <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Search className="h-4 w-4 text-purple-600" />
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900">Recherche patient</p>
-                  <p className="text-sm text-gray-500">Il y a 6 heures</p>
-                </div>
-                <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                  Recherche
-                </span>
-              </div>
+          <div className="p-6">
+            <div className="space-y-3">
+              {recentActivities.map((activity, index) => {
+                const Icon = activity.icon;
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors duration-200 group cursor-pointer"
+                    onClick={() => {
+                      if (activity.type === 'consultation') navigate('/history');
+                      else if (activity.type === 'scan') navigate('/nfc-scan');
+                      else navigate('/search');
+                    }}
+                  >
+                    <div className={`${activity.iconColor} h-12 w-12 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-200`}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        {activity.type === 'consultation' ? 'Consultation' : activity.type === 'scan' ? 'Scan NFC' : 'Recherche'} - {activity.name}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-0.5">{activity.time}</p>
+                    </div>
+                    <span className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full ${activity.statusColor} shadow-sm`}>
+                      {activity.status}
+                    </span>
+                    <svg className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

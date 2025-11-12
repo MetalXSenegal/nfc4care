@@ -286,21 +286,55 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <Activity className="h-12 w-12 text-blue-600" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex">
+      {/* Colonne gauche - Image/Illustration */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-8">
+        <div className="text-center text-white max-w-md">
+          <div className="mb-8 flex justify-center">
+            <div className="bg-white rounded-full p-6 shadow-2xl flex items-center justify-center">
+              <img
+                src="/assets/logo.png"
+                alt="NFC4Care Logo"
+                className="h-24 w-24 object-contain"
+                loading="eager"
+              />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold mb-4">NFC4Care</h1>
+          <p className="text-xl text-blue-100 mb-6">
+            Plateforme de gestion médicale sécurisée avec technologie NFC et blockchain
+          </p>
+          <div className="flex flex-col space-y-4 text-left">
+            <div className="flex items-center space-x-3">
+              <Shield className="h-6 w-6 flex-shrink-0" />
+              <span>Authentification sécurisée</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Activity className="h-6 w-6 flex-shrink-0" />
+              <span>Dossiers médicaux intégrés</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Smartphone className="h-6 w-6 flex-shrink-0" />
+              <span>Vérification 2FA</span>
+            </div>
+          </div>
         </div>
-        <h2 className="mt-4 text-center text-3xl font-extrabold text-gray-900">
-          NFC4Care
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Gestion médicale sécurisée avec blockchain
-        </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      {/* Colonne droite - Formulaire */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-sm">
+          <div className="flex justify-center lg:hidden mb-8">
+            <Activity className="h-12 w-12 text-blue-600" />
+          </div>
+          <h2 className="text-center text-3xl font-extrabold text-gray-900 mb-2">
+            Connexion
+          </h2>
+          <p className="text-center text-sm text-gray-600 mb-8">
+            NFC4Care - Plateforme médicale sécurisée
+          </p>
+
+          <div className="bg-white py-8 px-4 shadow-lg rounded-lg sm:px-10">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
               {error}
@@ -394,6 +428,7 @@ const Login: React.FC = () => {
               Tentatives restantes: {5 - loginAttempts}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

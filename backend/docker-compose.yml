@@ -1,5 +1,4 @@
-version: '3.8'
-
+name: nfc4care
 services:
   postgres:
     image: postgres:15-alpine

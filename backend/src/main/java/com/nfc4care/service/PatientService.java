@@ -2,6 +2,7 @@ package com.nfc4care.service;
 
 import com.nfc4care.dto.PatientDto;
 import com.nfc4care.entity.Patient;
+import com.nfc4care.exception.ResourceNotFoundException;
 import com.nfc4care.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +36,8 @@ public class PatientService {
         return patientRepository.findByNumeroNFC(numeroNFC);
     }
     
-    public List<Patient> searchPatients(String searchTerm) {
-        return patientRepository.searchPatients(searchTerm);
+    public Page<Patient> searchPatients(String searchTerm, Pageable pageable) {
+        return patientRepository.searchPatients(searchTerm, pageable);
     }
     
     public Patient createPatient(PatientDto patientDto) {
@@ -59,8 +60,8 @@ public class PatientService {
     
     public Patient updatePatient(Long id, PatientDto patientDto) {
         Patient patient = patientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Patient non trouvé"));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Patient avec l'ID " + id + " non trouvé"));
+
         patient.setNom(patientDto.getNom());
         patient.setPrenom(patientDto.getPrenom());
         patient.setDateNaissance(patientDto.getDateNaissance());
@@ -69,13 +70,13 @@ public class PatientService {
         patient.setTelephone(patientDto.getTelephone());
         patient.setEmail(patientDto.getEmail());
         patient.setGroupeSanguin(patientDto.getGroupeSanguin());
-        
+
         return patientRepository.save(patient);
     }
-    
+
     public void deletePatient(Long id) {
         Patient patient = patientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Patient non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient avec l'ID " + id + " non trouvé"));
         patient.setActif(false);
         patientRepository.save(patient);
     }

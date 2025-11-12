@@ -4,6 +4,8 @@ import com.nfc4care.dto.ApiResponse;
 import com.nfc4care.dto.PagedResponse;
 import com.nfc4care.dto.PatientDto;
 import com.nfc4care.entity.Patient;
+import com.nfc4care.service.DossierMedicalService;
+import com.nfc4care.service.ExportService;
 import com.nfc4care.service.PatientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,20 +13,29 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
+import com.itextpdf.text.DocumentException;
 
 @RestController
 @RequestMapping("/patients")
 @RequiredArgsConstructor
 @Slf4j
 public class PatientController {
-    
+
     private final PatientService patientService;
+    private final ExportService exportService;
+    private final DossierMedicalService dossierMedicalService;
     
     @GetMapping
     @PreAuthorize("hasRole('MEDECIN')")
@@ -85,15 +96,20 @@ public class PatientController {
     
     @GetMapping("/search")
     @PreAuthorize("hasRole('MEDECIN')")
-    public ResponseEntity<List<Patient>> searchPatients(@RequestParam String q) {
-        log.info("Recherche de patients avec le terme: {}", q);
+    public ResponseEntity<ApiResponse<PagedResponse<Patient>>> searchPatients(
+            @RequestParam String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("Recherche de patients avec le terme: {}, page: {}, size: {}", q, page, size);
         try {
-            List<Patient> patients = patientService.searchPatients(q);
-            log.info("✅ {} patients trouvés pour la recherche: {}", patients.size(), q);
-            return ResponseEntity.ok(patients);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Patient> patients = patientService.searchPatients(q, pageable);
+            log.info("✅ {} patients trouvés pour la recherche: {}", patients.getContent().size(), q);
+            return ResponseEntity.ok(ApiResponse.success(PagedResponse.of(patients)));
         } catch (Exception e) {
             log.error("❌ Erreur lors de la recherche de patients", e);
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("SEARCH_ERROR", e.getMessage()));
         }
     }
     
@@ -136,6 +152,56 @@ public class PatientController {
         } catch (Exception e) {
             log.error("❌ Erreur lors de la suppression du patient", e);
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{id}/export/pdf")
+    @PreAuthorize("hasRole('MEDECIN')")
+    public ResponseEntity<byte[]> exportPatientToPDF(@PathVariable Long id) {
+        log.info("Export PDF du patient avec l'ID: {}", id);
+        try {
+            Patient patient = patientService.getPatientById(id)
+                    .orElseThrow(() -> new com.nfc4care.exception.ResourceNotFoundException("Patient non trouvé"));
+
+            var dossier = dossierMedicalService.getByPatientId(id).orElse(null);
+            ByteArrayOutputStream pdfStream = exportService.exportToPDF(patient, dossier);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment",
+                    "dossier_" + patient.getNumeroDossier() + ".pdf");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfStream.toByteArray());
+        } catch (DocumentException | IOException e) {
+            log.error("Erreur lors de la génération du PDF", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/{id}/export/excel")
+    @PreAuthorize("hasRole('MEDECIN')")
+    public ResponseEntity<byte[]> exportPatientToExcel(@PathVariable Long id) {
+        log.info("Export Excel du patient avec l'ID: {}", id);
+        try {
+            Patient patient = patientService.getPatientById(id)
+                    .orElseThrow(() -> new com.nfc4care.exception.ResourceNotFoundException("Patient non trouvé"));
+
+            var dossier = dossierMedicalService.getByPatientId(id).orElse(null);
+            ByteArrayOutputStream excelStream = exportService.exportToExcel(patient, dossier);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment",
+                    "dossier_" + patient.getNumeroDossier() + ".xlsx");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelStream.toByteArray());
+        } catch (IOException e) {
+            log.error("Erreur lors de la génération d'Excel", e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 } 

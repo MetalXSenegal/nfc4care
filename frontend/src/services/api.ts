@@ -9,70 +9,52 @@ export interface ApiResponse<T> {
 class ApiService {
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('authToken');
-    console.log('🔑 Token récupéré:', token ? `${token.substring(0, 20)}...` : 'Aucun token');
-    console.log('🔑 TOKEN COMPLET DANS GETAUTHHEADERS:', token);
-    
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    
+
     if (token) {
       headers.Authorization = `Bearer ${token}`;
-      console.log('✅ Headers avec token:', { ...headers, Authorization: 'Bearer ***' });
-      console.log('✅ Token ajouté aux headers: Oui');
-    } else {
-      console.log('⚠️  Aucun token trouvé dans localStorage');
-      console.log('❌ Token ajouté aux headers: Non');
     }
-    
+
     return headers;
   }
 
   private async handleResponse<T>(response: Response, url?: string): Promise<ApiResponse<T>> {
-    console.log(`📡 Réponse reçue: ${response.status} ${response.statusText}`);
-    
     // Vérifier si c'est une requête de recherche pour éviter la déconnexion automatique
     const isSearchRequest = url && url.includes('/patients/search');
-    
+
     if (response.ok) {
       try {
         const data = await response.json();
-        console.log('✅ Données reçues:', data);
         return { data, success: true };
       } catch {
-        console.log('✅ Réponse OK sans données JSON');
         return { success: true };
       }
     } else if (response.status === 401) {
       // Token expiré ou invalide
-      console.log('❌ Token expiré ou invalide (401)');
-      
       // Pour les recherches, ne pas déclencher de déconnexion automatique
       if (isSearchRequest) {
-        console.log('🔍 Requête de recherche - Pas de déconnexion automatique');
         return { error: 'Session expirée. Veuillez vous reconnecter.', success: false };
       }
-      
+
       // Déclencher un événement global pour la modal d'expiration
       window.dispatchEvent(new CustomEvent('api-error', {
         detail: { status: 401, message: 'Token expiré' }
       }));
-      
+
       this.handleUnauthorized();
       return { error: 'Session expirée. Veuillez vous reconnecter.', success: false };
     } else if (response.status === 403) {
-      console.log('❌ Accès refusé (403) - Token manquant ou invalide');
-      
       // Pour les recherches, ne pas déclencher de déconnexion automatique
       if (isSearchRequest) {
-        console.log('🔍 Requête de recherche - Pas de déconnexion automatique');
         return { error: 'Accès refusé. Vous n\'avez pas les permissions nécessaires.', success: false };
       }
-      
+
       // Vérifier d'abord localement si le token existe
       const token = localStorage.getItem('authToken');
       if (!token) {
-        console.log('❌ Aucun token trouvé - Redirection vers login');
         this.handleUnauthorized();
       } else {
         // Validation silencieuse seulement si pas faite récemment
@@ -80,31 +62,26 @@ class ApiService {
         const now = Date.now();
         const timeSinceLastValidation = lastValidation ? now - parseInt(lastValidation) : Infinity;
         const oneHour = 60 * 60 * 1000;
-        
+
         if (timeSinceLastValidation > oneHour) {
-          console.log('🔄 Tentative de validation du token...');
           const isValid = await this.validateTokenSilently();
           if (!isValid) {
-            console.log('❌ Token invalide - Redirection vers login');
-            
             // Déclencher un événement global pour la modal d'expiration
             window.dispatchEvent(new CustomEvent('api-error', {
               detail: { status: 403, message: 'Token invalide' }
             }));
-            
+
             this.handleUnauthorized();
           } else {
             // Marquer la validation comme récente
             localStorage.setItem('lastTokenValidation', now.toString());
           }
         } else {
-          console.log('⚠️  Validation récente, redirection directe');
           this.handleUnauthorized();
         }
       }
       return { error: 'Accès refusé. Vous n\'avez pas les permissions nécessaires.', success: false };
     } else if (response.status === 404) {
-      console.log('❌ Ressource introuvable (404)');
       return { error: 'Ressource introuvable.', success: false };
     } else if (response.status === 422) {
       try {
@@ -114,7 +91,6 @@ class ApiService {
         return { error: 'Données invalides.', success: false };
       }
     } else if (response.status >= 500) {
-      console.log('❌ Erreur serveur (500+)');
       return { error: 'Erreur serveur. Veuillez réessayer plus tard.', success: false };
     } else {
       try {
@@ -127,15 +103,13 @@ class ApiService {
   }
 
   private handleUnauthorized() {
-    console.log('🧹 Nettoyage de l\'authentification locale');
     // Nettoyer l'authentification locale
     localStorage.removeItem('authToken');
     localStorage.removeItem('doctorData');
     localStorage.removeItem('pendingLogin');
-    
+
     // Rediriger vers la page de connexion si on est sur une page protégée
     if (window.location.pathname !== '/login') {
-      console.log('🔄 Redirection vers /login');
       window.location.href = '/login';
     }
   }
@@ -161,47 +135,34 @@ class ApiService {
   }
 
   private async makeRequest<T>(
-    url: string, 
+    url: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
-      console.log(`🌐 Requête API: ${options.method || 'GET'} ${url}`);
-      
       const authHeaders = this.getAuthHeaders();
       const headers = {
         ...authHeaders,
         ...options.headers,
       };
-      
-      console.log('📋 Headers finaux:', { ...headers, Authorization: (headers as any).Authorization ? 'Bearer ***' : 'Aucun' });
-      console.log('🔑 Token envoyé dans la requête:', (headers as any).Authorization ? 'Oui' : 'Non');
-      
+
       const response = await fetch(url, {
         ...options,
         headers,
       });
-      
-      console.log(`📡 Réponse API: ${response.status} ${response.statusText}`);
-      console.log(`📡 URL de la requête: ${url}`);
-      console.log(`📡 Headers envoyés:`, Object.keys(headers));
-      
+
       return this.handleResponse<T>(response, url);
     } catch (error) {
-      console.error('❌ Erreur de requête API:', error);
-      console.error('📡 URL qui a échoué:', url);
-      
       // Gérer les erreurs de réseau
       if (error instanceof TypeError && error.message.includes('fetch')) {
         return { error: 'Erreur de connexion au serveur. Vérifiez votre connexion internet.', success: false };
       }
-      
+
       return { error: 'Erreur de connexion au serveur', success: false };
     }
   }
 
   // Authentification
   async login(email: string, password: string): Promise<ApiResponse<any>> {
-    console.log('Tentative de connexion pour:', email);
     return this.makeRequest(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       body: JSON.stringify({ email, password }),
@@ -209,7 +170,6 @@ class ApiService {
   }
 
   async verify2FA(code: string, token: string): Promise<ApiResponse<any>> {
-    console.log('Vérification 2FA avec code:', code);
     return this.makeRequest(`${API_BASE_URL}/auth/verify-2fa`, {
       method: 'POST',
       headers: {
@@ -221,12 +181,10 @@ class ApiService {
   }
 
   async validateToken(): Promise<ApiResponse<any>> {
-    console.log('Validation du token JWT');
     return this.makeRequest(`${API_BASE_URL}/auth/validate`);
   }
 
   async logout(): Promise<ApiResponse<void>> {
-    console.log('Tentative de déconnexion');
     const result = await this.makeRequest<void>(`${API_BASE_URL}/auth/logout`, {
       method: 'POST',
     });
@@ -240,7 +198,6 @@ class ApiService {
   }
 
   async logoutAllSessions(): Promise<ApiResponse<void>> {
-    console.log('Tentative de déconnexion de toutes les sessions');
     const result = await this.makeRequest<void>(`${API_BASE_URL}/auth/logout-all`, {
       method: 'POST',
     });

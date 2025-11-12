@@ -13,29 +13,27 @@ import java.util.Collections;
 @Configuration
 public class CorsConfig {
 
-    @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
+    @Value("${cors.allowed-origins:http://localhost:5173}")
     private String allowedOrigins;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Parse allowed origins from configuration
+        // Parse allowed origins from configuration (specific origins only)
         String[] origins = allowedOrigins.split(",");
         configuration.setAllowedOrigins(Arrays.asList(origins));
 
-        // Allow network local access patterns for development
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://*:5173",
-            "http://*:3000",
-            "http://*:8080"
-        ));
-
-        // Autoriser les méthodes HTTP
+        // Autoriser les méthodes HTTP (seulement nécessaires)
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        // Autoriser les en-têtes standards
-        configuration.setAllowedHeaders(Collections.singletonList("*"));
+        // Autoriser seulement les en-têtes nécessaires
+        configuration.setAllowedHeaders(Arrays.asList(
+            "Content-Type",
+            "Authorization",
+            "X-Requested-With",
+            "Accept"
+        ));
 
         // Autoriser les credentials (cookies, auth headers)
         configuration.setAllowCredentials(true);

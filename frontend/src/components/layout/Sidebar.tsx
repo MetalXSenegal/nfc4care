@@ -62,6 +62,14 @@ const Sidebar: React.FC = () => {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-center h-16 px-4 bg-blue-600 text-white">
+            <div className="bg-white rounded-full p-2 mr-2 shadow-sm flex items-center justify-center">
+              <img
+                src="/assets/logo.png"
+                alt="NFC4Care Logo"
+                className="h-8 w-8 object-contain"
+                loading="eager"
+              />
+            </div>
             <h1 className="text-xl font-bold">NFC4Care</h1>
           </div>
 

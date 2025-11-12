@@ -45,23 +45,32 @@ const MobileHeader: React.FC = () => {
   return (
     <>
       {/* Header fixe */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-blue-500 to-blue-600 border-b border-blue-300 shadow-lg">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Logo et titre */}
             <div className="flex items-center">
-              <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                <span className="text-white font-bold text-sm">N</span>
+              <div className="bg-white rounded-full p-1.5 mr-3 shadow-sm flex items-center justify-center">
+                <img
+                  src="/assets/logo.png"
+                  alt="NFC4Care Logo"
+                  className="h-6 w-6 object-contain"
+                  loading="eager"
+                />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900">NFC4Care</h1>
-                <p className="text-xs text-gray-500">Médecine sécurisée</p>
+                <h1 className="text-lg font-bold text-white">NFC4Care</h1>
+                <p className="text-xs text-blue-100">Médecine sécurisée</p>
               </div>
             </div>
 
             {/* Actions rapides */}
             <div className="flex items-center space-x-2">
-              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+              <button 
+                className="p-2 text-white hover:text-blue-100 hover:bg-white/20 rounded-lg transition-colors"
+                aria-label="Notifications"
+                title="Notifications"
+              >
                 <Bell size={20} />
               </button>
               
@@ -69,7 +78,9 @@ const MobileHeader: React.FC = () => {
               <div className="relative">
                 <button 
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="flex items-center p-2 text-white hover:text-blue-100 hover:bg-white/20 rounded-lg transition-colors"
+                  aria-label="Menu utilisateur"
+                  title="Menu utilisateur"
                 >
                   <User size={20} />
                   <ChevronDown size={16} className="ml-1" />
