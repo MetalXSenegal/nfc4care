@@ -406,23 +406,6 @@ const Login: React.FC = () => {
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Compte de test
-                </span>
-              </div>
-            </div>
-            <div className="mt-4 text-center text-xs text-gray-500">
-              <p>Email: doctor@example.com</p>
-              <p>Mot de passe: password</p>
-            </div>
-          </div>
-
           {loginAttempts > 0 && !isLocked && (
             <div className="mt-4 text-center text-xs text-orange-600">
               Tentatives restantes: {5 - loginAttempts}

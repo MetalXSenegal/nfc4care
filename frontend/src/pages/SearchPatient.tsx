@@ -15,6 +15,16 @@ interface SearchFilters {
   hasNFC: boolean;
 }
 
+interface PaginatedResponse {
+  content: Patient[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 const SearchPatient: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Patient[]>([]);
@@ -85,10 +95,52 @@ const SearchPatient: React.FC = () => {
       const response = await apiService.searchPatients(term);
       
       if (response.success && response.data) {
-        console.log('✅ Recherche réussie:', response.data.length, 'patients trouvés');
-        setSearchResults(response.data);
+        // L'API backend renvoie: { success: true, data: { content: [...], ... } }
+        // Le service API fait response.json() et retourne: { success: true, data: { success: true, data: { content: [...] } } }
+        // Donc response.data = { success: true, data: { content: [...] } }
+        let patients: Patient[] = [];
+        const apiResponse = response.data as { success?: boolean; data?: PaginatedResponse | Patient[] } | PaginatedResponse | Patient[];
+        
+        console.log('📦 Données brutes reçues:', response);
+        console.log('📦 response.data:', apiResponse);
+        
+        // Extraire les données - vérifier si c'est wrapper dans un objet avec success/data
+        let data: PaginatedResponse | Patient[] | undefined;
+        if (apiResponse && typeof apiResponse === 'object' && 'data' in apiResponse && apiResponse.data) {
+          // Cas: { success: true, data: { content: [...] } }
+          data = apiResponse.data as PaginatedResponse | Patient[];
+          console.log('📦 Données extraites de response.data.data:', data);
+        } else {
+          // Cas: directement { content: [...] } ou [...]
+          data = apiResponse as PaginatedResponse | Patient[];
+          console.log('📦 Données utilisées directement:', data);
+        }
+        
+        // Vérifier si c'est une structure paginée
+        if (data && typeof data === 'object' && !Array.isArray(data) && 'content' in data) {
+          // Structure paginée: { content: [...], pageNumber, pageSize, etc. }
+          const paginatedData = data as PaginatedResponse;
+          if (Array.isArray(paginatedData.content)) {
+            patients = paginatedData.content;
+            console.log('✅ Recherche réussie (paginée):', patients.length, 'patients trouvés sur', paginatedData.totalElements || patients.length);
+          } else {
+            console.warn('⚠️ content n\'est pas un tableau:', paginatedData.content);
+            patients = [];
+          }
+        } else if (Array.isArray(data)) {
+          // Structure simple: tableau direct
+          patients = data;
+          console.log('✅ Recherche réussie (tableau direct):', patients.length, 'patients trouvés');
+        } else {
+          console.warn('⚠️ Format de réponse inattendu:', data);
+          patients = [];
+        }
+        
+        console.log('👥 Patients extraits:', patients);
+        setSearchResults(patients);
       } else {
         console.log('❌ Erreur de recherche:', response.error);
+        setSearchResults([]);
         // Ne pas afficher d'erreur pour les recherches en temps réel
         // Seulement pour les recherches manuelles
         if (term.length > 2) {
@@ -97,6 +149,7 @@ const SearchPatient: React.FC = () => {
       }
     } catch (error) {
       console.error('❌ Exception lors de la recherche:', error);
+      setSearchResults([]);
       // Ne pas afficher d'erreur pour les recherches en temps réel
       // Seulement pour les recherches manuelles
       if (term.length > 2) {
@@ -113,10 +166,54 @@ const SearchPatient: React.FC = () => {
       setLoading(true);
       apiService.getPatients().then(response => {
         if (response.success && response.data) {
-          setSearchResults(response.data);
+          // L'API retourne une structure paginée avec data.content
+          let patients: Patient[] = [];
+          const apiResponse = response.data as { success?: boolean; data?: PaginatedResponse | Patient[] } | PaginatedResponse | Patient[];
+          
+          console.log('📦 Chargement initial - Données brutes:', response);
+          console.log('📦 response.data:', apiResponse);
+          
+          // Extraire les données - vérifier si c'est wrapper dans un objet avec success/data
+          let data: PaginatedResponse | Patient[] | undefined;
+          if (apiResponse && typeof apiResponse === 'object' && 'data' in apiResponse && apiResponse.data) {
+            // Cas: { success: true, data: { content: [...] } }
+            data = apiResponse.data as PaginatedResponse | Patient[];
+            console.log('📦 Données extraites de response.data.data:', data);
+          } else {
+            // Cas: directement { content: [...] } ou [...]
+            data = apiResponse as PaginatedResponse | Patient[];
+            console.log('📦 Données utilisées directement:', data);
+          }
+          
+          // Vérifier si c'est une structure paginée
+          if (data && typeof data === 'object' && !Array.isArray(data) && 'content' in data) {
+            // Structure paginée: { content: [...], pageNumber, pageSize, etc. }
+            const paginatedData = data as PaginatedResponse;
+            if (Array.isArray(paginatedData.content)) {
+              patients = paginatedData.content;
+              console.log('✅ Chargement initial (paginé):', patients.length, 'patients chargés');
+            } else {
+              console.warn('⚠️ content n\'est pas un tableau:', paginatedData.content);
+              patients = [];
+            }
+          } else if (Array.isArray(data)) {
+            // Structure simple: tableau direct
+            patients = data;
+            console.log('✅ Chargement initial (tableau direct):', patients.length, 'patients chargés');
+          } else {
+            console.warn('⚠️ Format de réponse inattendu:', data);
+            patients = [];
+          }
+          
+          console.log('👥 Patients chargés:', patients);
+          setSearchResults(patients);
         } else {
           setSearchResults([]);
         }
+        setLoading(false);
+      }).catch(error => {
+        console.error('Erreur lors du chargement des patients:', error);
+        setSearchResults([]);
         setLoading(false);
       });
     }
@@ -351,7 +448,7 @@ const SearchPatient: React.FC = () => {
         )}
         
         {/* Résultats */}
-        {isSearching && (
+        {(isSearching || searchResults.length > 0) && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-4 py-3 border-b border-gray-200">
               <h2 className="text-lg font-semibold">
@@ -367,7 +464,7 @@ const SearchPatient: React.FC = () => {
             ) : searchResults.length === 0 ? (
               <div className="p-6 text-center">
                 <div className="text-gray-400 mb-2">🔍</div>
-                <p className="text-gray-500">Aucun patient trouvé pour "{searchTerm}"</p>
+                <p className="text-gray-500">Aucun patient trouvé {isSearching ? `pour "${searchTerm}"` : ''}</p>
                 <p className="text-sm text-gray-400 mt-1">Essayez avec d'autres termes ou vérifiez l'orthographe</p>
               </div>
             ) : (

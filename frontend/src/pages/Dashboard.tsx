@@ -55,6 +55,7 @@ const Dashboard: React.FC = () => {
       color: 'bg-blue-500',
       textColor: 'text-blue-500',
       gradient: 'from-blue-500 to-blue-600',
+      image: '/assets/recherche.png',
       primary: true,
     },
     {
@@ -65,6 +66,7 @@ const Dashboard: React.FC = () => {
       color: 'bg-green-500',
       textColor: 'text-green-500',
       gradient: 'from-green-500 to-green-600',
+      image: '/assets/scan_nfc.png',
     },
     {
       name: 'Historique',
@@ -74,6 +76,7 @@ const Dashboard: React.FC = () => {
       color: 'bg-purple-500',
       textColor: 'text-purple-500',
       gradient: 'from-purple-500 to-purple-600',
+      image: '/assets/historique.png',
     }
   ];
 
@@ -189,41 +192,53 @@ const Dashboard: React.FC = () => {
                   key={action.name}
                   onClick={() => navigate(action.href)}
                   className={`
-                    group relative bg-white rounded-2xl shadow-lg overflow-hidden 
+                    group relative rounded-2xl shadow-lg overflow-hidden 
                     hover:shadow-2xl transition-all duration-300 text-left
-                    transform hover:-translate-y-1
+                    transform hover:-translate-y-1 h-48
                     ${action.primary ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
                   `}
                 >
-                  {/* Gradient background effect */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
+                  {/* Background Image */}
+                  <div className="absolute inset-0">
+                    <img
+                      src={action.image}
+                      alt={action.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    {/* Overlay gradient for readability */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-80 group-hover:opacity-70 transition-opacity duration-300`}></div>
+                    {/* Additional dark overlay for text contrast */}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-300"></div>
+                  </div>
                   
                   {/* Content */}
-                  <div className="relative p-6">
-                    <div className="flex items-start gap-4">
+                  <div className="relative h-full flex flex-col justify-between p-6 text-white">
+                    <div className="flex items-start justify-between gap-4">
                       <div className={`
-                        p-4 rounded-2xl bg-gradient-to-br ${action.gradient} 
+                        p-3 rounded-xl bg-white/20 backdrop-blur-sm
                         shadow-lg group-hover:scale-110 transition-transform duration-300
-                        flex-shrink-0
+                        flex-shrink-0 border border-white/30
                       `}>
                         <Icon className="h-6 w-6 text-white" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className={`font-bold text-gray-900 ${action.primary ? 'text-lg' : 'text-base'}`}>
-                            {action.name}
-                          </h3>
-                          {action.primary && (
-                            <span className="text-yellow-400 text-lg">⭐</span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 leading-relaxed">{action.description}</p>
-                        <div className="mt-3 flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-600 transition-colors">
-                          <span>Accéder</span>
-                          <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
+                      {action.primary && (
+                        <span className="text-yellow-300 text-xl drop-shadow-lg">⭐</span>
+                      )}
+                    </div>
+                    
+                    <div className="mt-auto">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className={`font-bold text-white drop-shadow-lg ${action.primary ? 'text-xl' : 'text-lg'}`}>
+                          {action.name}
+                        </h3>
+                      </div>
+                      <p className="text-sm text-white/90 drop-shadow-md leading-relaxed mb-3">{action.description}</p>
+                      <div className="flex items-center text-xs font-semibold text-white/80 group-hover:text-white transition-colors">
+                        <span>Accéder</span>
+                        <svg className="ml-1 h-3 w-3 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </div>
                     </div>
                   </div>

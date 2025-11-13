@@ -74,7 +74,7 @@ const NFCScanner: React.FC = () => {
       } else {
         // Si aucun patient trouvé, simuler un patient
         setScanStatus('success');
-        setMessage('Patient trouvé: Jean Dupont');
+        setMessage('Patient trouvé: Awa Sarr');
         
         setTimeout(() => {
           navigate('/patient/1');
